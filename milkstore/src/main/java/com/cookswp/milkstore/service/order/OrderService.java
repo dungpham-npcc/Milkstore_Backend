@@ -147,10 +147,8 @@ public class OrderService implements IOrderService {
                 shoppingCart.getItems().clear();
                 shoppingCartRepository.save(shoppingCart);
             }
-        //BAO BEU
-        }//add new
-        orderRepository.save(order);
-        return order;
+        }
+        return orderRepository.save(order);
     }
 
     @Override
@@ -191,6 +189,7 @@ public class OrderService implements IOrderService {
     @Transactional
     public Order cancelOrder(String OrderId, String reason) {
         Order order = getOrderById(OrderId);
+        order.setFailureReasonNote(reason);
         String reasons = order.getFailureReasonNote();
         String[] token = reasons.split(";");
         List<String> reasonList = Arrays.asList(token);
@@ -201,7 +200,7 @@ public class OrderService implements IOrderService {
         } else if (reasonList.size() == 1) {
             order.setFailureReasonNote(reasonList.get(0)
             + ";" + reason + "|" + LocalDateTime.now());
-            order.setOrderStatus(Status.CANNOT_CONFRIRM);
+            order.setOrderStatus(Status.CANNOT_DELIVER);
         } else {
             throw new RuntimeException("Can not cancel order more than 2 times");
         }
