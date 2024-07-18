@@ -21,7 +21,7 @@ public class GlobalHandlerException extends RuntimeException {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ResponseError> handleAppException(AppException e) {
         ErrorCode errorCode = e.getErrorCode();
-        System.out.println("App Exception Handler");
+        System.out.println("App Exception Handler [ErrorCode: " + errorCode + ", Message: " + errorCode.getMessage() + "]");
         ResponseError responseError = new ResponseError();
         responseError.setCode(errorCode.getCode());
         responseError.setMessage(errorCode.getMessage());
