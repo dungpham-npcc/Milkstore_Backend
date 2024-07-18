@@ -44,7 +44,7 @@ public class OrderController {
     }
 
     //This API use to UpdateOrder information
-    @PutMapping("/{id}")
+    @PutMapping("/update-order/{id}")
     public ResponseData<Order> updateOrder(@PathVariable String id, @RequestBody OrderDTO orderDTO) {
         return new ResponseData<>(HttpStatus.ACCEPTED.value(), "UPDATE ORDER", orderService.updateOrder(id, orderDTO));
     }
