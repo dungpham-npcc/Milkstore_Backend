@@ -48,7 +48,7 @@ public class OrderService implements IOrderService {
     private final ShoppingCartRepository shoppingCartRepository;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository,  FirebaseService firebaseService, ShoppingCartService shoppingCartService, ShoppingCartRepository shoppingCartRepository) {
+    public OrderService(OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository, FirebaseService firebaseService, ShoppingCartService shoppingCartService, ShoppingCartRepository shoppingCartRepository) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.shoppingCartItemRepository = shoppingCartItemRepository;
@@ -86,10 +86,10 @@ public class OrderService implements IOrderService {
         order.setTotalPrice(orderDTO.getTotalPrice());
         order.setOrderDate(LocalDateTime.now());
         order.setShippingAddress(orderDTO.getShippingAddress());
-       // order.setCart(orderDTO.);
+        // order.setCart(orderDTO.);
 
         //Save Cart Information before clear Cart
-        if(orderDTO.getItems() != null){
+        if (orderDTO.getItems() != null) {
             saveOrderItems(order, orderDTO.getItems());
         }
 
@@ -147,7 +147,7 @@ public class OrderService implements IOrderService {
                 shoppingCart.getItems().clear();
                 shoppingCartRepository.save(shoppingCart);
             }
-        //BAO BEU
+            //BAO BEU
         }//add new
         orderRepository.save(order);
         return order;
@@ -189,25 +189,34 @@ public class OrderService implements IOrderService {
 
     //Method to Cancel Order with Reason
     @Transactional
-    public Order cancelOrder(String OrderId, String reason) {
-        Order order = getOrderById(OrderId);
-        String reasons = order.getFailureReasonNote();
-        String[] token = reasons.split(";");
+    public Order cancelOrder(String orderId, String reason) {
+        Order order = getOrderById(orderId);
+
+        String existingReasons = order.getFailureReasonNote();
+        String combinedReasons = existingReasons != null && !existingReasons.isEmpty()
+                ? existingReasons + " ; " + reason
+                : reason;
+
+        String[] token = combinedReasons.split(";");
         List<String> reasonList = Arrays.asList(token);
 
-        if(reasonList.isEmpty()) {
-            order.setFailureReasonNote(reason + "|" + LocalDateTime.now());
-            order.setOrderStatus(Status.CANNOT_DELIVER);
-        } else if (reasonList.size() == 1) {
-            order.setFailureReasonNote(reasonList.get(0)
-            + ";" + reason + "|" + LocalDateTime.now());
+        System.out.println(reasonList);
+
+        String failureReasonNote;
+        if (reasonList.size() == 1) {
+            failureReasonNote = reasonList.get(0).trim() + " | " + LocalDateTime.now();
             order.setOrderStatus(Status.CANNOT_CONFRIRM);
+        } else if (reasonList.size() == 2) {
+            failureReasonNote = reasonList.get(0).trim() + " ; " + reasonList.get(1).trim() + " | " + LocalDateTime.now();
+            order.setOrderStatus(Status.CANNOT_DELIVER);
         } else {
-            throw new RuntimeException("Can not cancel order more than 2 times");
+            throw new RuntimeException("Không thể huỷ đơn hàng hơn 2 lần");
         }
 
+        order.setFailureReasonNote(failureReasonNote);
         return orderRepository.save(order);
     }
+
 
     //Method to Transfer InDelivery to CompleteTransaction Status
     @Transactional
@@ -228,7 +237,10 @@ public class OrderService implements IOrderService {
         if (order.getOrderStatus() == Status.CANNOT_DELIVER) {
             order.setOrderStatus(Status.IN_DELIVERY);
             return orderRepository.save(order);
-        } else{
+        } else if (order.getOrderStatus() == Status.CANNOT_CONFRIRM) {
+            order.setOrderStatus(Status.IN_DELIVERY);
+            return orderRepository.save(order);
+        } else {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
     }
@@ -276,8 +288,9 @@ public class OrderService implements IOrderService {
         order.setShippingAddress(orderDTO.getShippingAddress());
         return order;
     }
+
     @Override
-    public Long getNumberOfOrdersByStatus(String status) throws IllegalArgumentException{
+    public Long getNumberOfOrdersByStatus(String status) throws IllegalArgumentException {
         return orderRepository.getNumberOfOrdersByStatus(Status.valueOf(status));
     }
 
