@@ -38,6 +38,7 @@ public class FeedBackServiceImpl implements IFeedBackService {
         Order order = orderService.getOrderById(feedBackRequest.getOrderID());
         if (order.getOrderStatus() == Status.COMPLETE_EXCHANGE) {
             feedback.setOrderID(feedBackRequest.getOrderID());
+            order.setOrderStatus(Status.IS_FEEDBACK);
         }
         feedback.setRating(rating);
         feedback.setUserID(feedBackRequest.getUserID());
