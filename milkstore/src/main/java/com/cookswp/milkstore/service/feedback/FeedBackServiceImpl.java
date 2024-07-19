@@ -22,10 +22,12 @@ public class FeedBackServiceImpl implements IFeedBackService {
 
     private final FeedbackRepository feedbackRepository;
     private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
     public FeedBackServiceImpl(FeedbackRepository feedbackRepository, OrderService orderService, OrderRepository orderRepository) {
         this.feedbackRepository = feedbackRepository;
         this.orderService = orderService;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -39,12 +41,14 @@ public class FeedBackServiceImpl implements IFeedBackService {
         if (order.getOrderStatus() == Status.COMPLETE_EXCHANGE) {
             feedback.setOrderID(feedBackRequest.getOrderID());
             order.setOrderStatus(Status.IS_FEEDBACK);
+            orderRepository.save(order);
         }
         feedback.setRating(rating);
         feedback.setUserID(feedBackRequest.getUserID());
         feedback.setFeedbackTime(LocalDateTime.now());
         feedback.setDescription(feedBackRequest.getDescription());
         feedback.setStatus(true);
+
         return feedbackRepository.save(feedback);
     }
 
