@@ -19,9 +19,14 @@ import java.util.Optional;
 public class RefundService implements IRefundService{
 
 
-    private RefundRepository refundRepository;
+    private final RefundRepository refundRepository;
 
-    private FirebaseService firebaseService;
+    private final FirebaseService firebaseService;
+
+    public RefundService(RefundRepository refundRepository, FirebaseService firebaseService) {
+        this.refundRepository = refundRepository;
+        this.firebaseService = firebaseService;
+    }
 
     //This function make to customer create a refund request
     @Override
