@@ -40,28 +40,28 @@ public class Refund implements Serializable {
     @Column(name = "sender_address", nullable = false)
     private String senderAddress;
 
-    @Column(name = "prodcut_name", nullable = false)
+    @Column(name = "product_name", nullable = false)
     private String productName;
 
     @Column(name = "customer_refund_reason", nullable = false)
     private String customerRefundReason;
 
-    @Column(name = "customer_note", nullable = true)
+    @Column(name = "customer_note", nullable = false)
     private String customerNote;
 
-    @Column(name = "staff_note", nullable = false)
+    @Column(name = "staff_note", nullable = true)
     private String staffNote;
 
     @Column(name = "customer_image", nullable = false)
     private String customerImage;
 
-    @Column(name = "staff_reject_reason", nullable = false)
+    @Column(name = "staff_reject_reason", nullable = true)
     private String staffRejectReason;
 
-    @Column(name = "staff_reject_image", nullable = false)
+    @Column(name = "staff_reject_image", nullable = true)
     private String staffRejectImage;
 
-    @Column(name = "staff_received_image", nullable = false)
+    @Column(name = "staff_received_image", nullable = true)
     private String staffReceivedImage;
 
     @Enumerated(EnumType.STRING)

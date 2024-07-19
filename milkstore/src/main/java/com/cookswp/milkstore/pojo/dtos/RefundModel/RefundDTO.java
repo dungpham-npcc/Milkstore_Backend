@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RefundDTO {
 
-    private int id;
-    private LocalDateTime requestTime;
     private int userId;
     private String senderName;
     private String senderAddress;
@@ -21,11 +19,6 @@ public class RefundDTO {
     private String productName;
     private String customerRefundReason;
     private String customerNote;
-    private String staffNote;
     private String customerImage;
-    private String staffRejectReason;
-    private String staffRejectImage;
-    private String staffReceivedImage;
-    private RefundStatus refundStatus;
 
 }

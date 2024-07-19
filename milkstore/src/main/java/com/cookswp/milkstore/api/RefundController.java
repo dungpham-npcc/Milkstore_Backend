@@ -20,11 +20,11 @@ public class RefundController {
     @Autowired
     private RefundService refundService;
 
-    @PostMapping("/create")
+    @RequestMapping(method = RequestMethod.POST, value = "/create", consumes="multipart/form-data")
     public ResponseData<Refund> createRefundRequest(
             @RequestParam int userID,
             @RequestParam("refundImageFile") MultipartFile refundImageFile,
-            @RequestBody RefundDTO refundDTO) {
+            @ModelAttribute RefundDTO refundDTO) {
         Refund refund = refundService.createRefundRequest(userID, refundDTO, refundImageFile);
         return new ResponseData<>(HttpStatus.OK.value(), "Create Refund Request Successful", refund);
     }
