@@ -192,6 +192,10 @@ public class OrderService implements IOrderService {
     public Order cancelOrder(String orderId, String reason) {
         Order order = getOrderById(orderId);
 
+        if(reason.isEmpty()){
+            throw new AppException(ErrorCode.REASON_EMPTY);
+        }
+
         String existingReasons = order.getFailureReasonNote();
         String combinedReasons = existingReasons != null && !existingReasons.isEmpty()
                 ? existingReasons + " ; " + reason
@@ -210,7 +214,7 @@ public class OrderService implements IOrderService {
             failureReasonNote = reasonList.get(0).trim() + " ; " + reasonList.get(1).trim() + " | " + LocalDateTime.now();
             order.setOrderStatus(Status.CANNOT_DELIVER);
         } else {
-            throw new RuntimeException("Không thể huỷ đơn hàng hơn 2 lần");
+            throw new AppException(ErrorCode.CANCEL_ORDER_ERROR);
         }
 
         order.setFailureReasonNote(failureReasonNote);

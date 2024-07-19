@@ -36,8 +36,9 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(29, "Đơn hàng không tìm thấy"),
     INVALID_ORDER_STATUS(30, "Đơn hàng không có trạng thái đúng để xác định"),
     FEEDBACK_NOT_FOUND(31, "Không tìm thấy bài đánh giá"),
-    FEEDBACK_RATING_ERROR(32, "Đánh giá nên từ 1 đến 5 sao");
-
+    FEEDBACK_RATING_ERROR(32, "Đánh giá nên từ 1 đến 5 sao"),
+    REASON_EMPTY(33, "Lý do không thể để trống"),
+    CANCEL_ORDER_ERROR(34, "Không thể hủy đơn quá 2 lần");
 
 
     private final int code;
