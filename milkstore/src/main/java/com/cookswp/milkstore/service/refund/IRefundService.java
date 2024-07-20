@@ -9,20 +9,17 @@ import java.util.Optional;
 
 public interface IRefundService {
 
-
-
-    Optional<Refund> getRefundRequestByUserId (int userId);
+    Refund getRefundRequestByUserId(int userId);
 
     List<Refund> getAllRefundRequest();
 
-    Refund updateRefundImage(int userId, int refundId, MultipartFile refundImage);
-
+    Refund updateRefundImage(int refundId, MultipartFile refundImage);
 
 
     //Customer
     Refund cancelRefundRequestForCustomer(int refundId);
 
-    Refund createRefundRequest (int userID, RefundDTO refundDTO, MultipartFile refundImageFile);
+    Refund createRefundRequest(int userID, RefundDTO refundDTO, MultipartFile refundImageFile);
 
 
     //Staff
@@ -30,11 +27,11 @@ public interface IRefundService {
 
     Refund confirmRequestRefund(int refundId);
 
-    Refund completeTakingRefundOrder (int refundId, MultipartFile refundEvidence);
+    Refund completeTakingRefundOrder(int refundId, MultipartFile refundEvidence);
 
-    Refund changeStatusToRefundMoney (int refundId, String staffNote);
+    Refund changeStatusToRefundMoney(int refundId, String staffNote);
 
-    Refund changeStatusToShopProcess (int refundId);
+    Refund changeStatusToShopProcess(int refundId);
 
     Refund denyRequestRefund(int refundId, MultipartFile denyImage, String staffRejectReason);
 

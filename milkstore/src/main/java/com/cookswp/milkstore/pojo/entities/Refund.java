@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 public class Refund implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "refund_id")
     private int id;
 

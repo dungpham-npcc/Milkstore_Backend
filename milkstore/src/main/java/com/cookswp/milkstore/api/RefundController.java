@@ -17,93 +17,70 @@ import java.util.Optional;
 @RequestMapping("/api/refund")
 public class RefundController {
 
-    @Autowired
-    private RefundService refundService;
+    private final RefundService refundService;
 
-    @RequestMapping(method = RequestMethod.POST, value = "/create", consumes="multipart/form-data")
-    public ResponseData<Refund> createRefundRequest(
-            @RequestParam int userID,
-            @RequestParam("refundImageFile") MultipartFile refundImageFile,
-            @ModelAttribute RefundDTO refundDTO) {
-        Refund refund = refundService.createRefundRequest(userID, refundDTO, refundImageFile);
-        return new ResponseData<>(HttpStatus.OK.value(), "Create Refund Request Successful", refund);
+    public RefundController(RefundService refundService) {
+        this.refundService = refundService;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/create", consumes = "multipart/form-data")
+    public ResponseData<Refund> createRefundRequest(@RequestParam int userID, @RequestParam("refundImageFile") MultipartFile refundImageFile, @ModelAttribute RefundDTO refundDTO) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Create Refund Request Successful", refundService.createRefundRequest(userID, refundDTO, refundImageFile));
     }
 
     @GetMapping("/{userId}")
-    public ResponseData<Optional<Refund>> getRefundRequestByUserId(@PathVariable int userId) {
-        Optional<Refund> refund = refundService.getRefundRequestByUserId(userId);
-        return new ResponseData<>(HttpStatus.OK.value(), "Get Refund Request By User ID", refund);
+    public ResponseData<Refund> getRefundRequestByUserId(@PathVariable int userId) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Get Refund Request By User ID", refundService.getRefundRequestByUserId(userId));
     }
 
     @GetMapping("/all")
     public ResponseData<List<Refund>> getAllRefundRequests() {
-        List<Refund> refunds = refundService.getAllRefundRequest();
-        return new ResponseData<>(HttpStatus.OK.value(), "Get All Refund Requests", refunds);
+        return new ResponseData<>(HttpStatus.OK.value(), "Get All Refund Requests", refundService.getAllRefundRequest());
     }
 
-    @PutMapping("/{refundId}/updateImage")
-    public ResponseData<Refund> updateRefundImage(
-            @PathVariable int refundId,
-            @RequestParam("refundImage") MultipartFile refundImage) {
-        Refund refund = refundService.updateRefundImage(refundId, refundId, refundImage);
-        return new ResponseData<>(HttpStatus.OK.value(), "Update Refund Image Successful", refund);
+    @PatchMapping("/{refundId}/updateImage")
+    public ResponseData<Refund> updateRefundImage(@PathVariable int refundId, @RequestParam("refundImage") MultipartFile refundImage) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Update Refund Image Successful", refundService.updateRefundImage(refundId, refundImage));
     }
 
-    @DeleteMapping("/{refundId}/cancel")
+    @PatchMapping("/{refundId}/cancel")
     public ResponseData<Refund> cancelRefundRequestForCustomer(@PathVariable int refundId) {
-        Refund refund = refundService.cancelRefundRequestForCustomer(refundId);
-        return new ResponseData<>(HttpStatus.OK.value(), "Cancel Refund Request Successful", refund);
+        return new ResponseData<>(HttpStatus.OK.value(), "Cancel Refund Request Successful", refundService.cancelRefundRequestForCustomer(refundId));
     }
 
-    @PostMapping("/{refundId}/deny")
-    public ResponseData<Refund> denyRequestRefund(
-            @PathVariable int refundId,
-            @RequestParam("denyImage") MultipartFile denyImage,
-            @RequestParam String staffRejectReason) {
-        Refund refund = refundService.denyRequestRefund(refundId, denyImage, staffRejectReason);
-        return new ResponseData<>(HttpStatus.OK.value(), "Deny Refund Request Successful", refund);
+    @PatchMapping("/{refundId}/deny")
+    public ResponseData<Refund> denyRequestRefund(@PathVariable int refundId, @RequestParam("denyImage") MultipartFile denyImage, @RequestParam String staffRejectReason) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Deny Refund Request Successful", refundService.denyRequestRefund(refundId, denyImage, staffRejectReason));
     }
 
-    @PostMapping("/{refundId}/confirm")
+    @PatchMapping("/{refundId}/confirm")
     public ResponseData<Refund> confirmRequestRefund(@PathVariable int refundId) {
-        Refund refund = refundService.confirmRequestRefund(refundId);
-        return new ResponseData<>(HttpStatus.OK.value(), "Confirm Refund Request Successful", refund);
+        return new ResponseData<>(HttpStatus.OK.value(), "Confirm Refund Request Successful", refundService.confirmRequestRefund(refundId));
     }
 
-    @PostMapping("/{refundId}/completeTaking")
-    public ResponseData<Refund> completeTakingRefundOrder(
-            @PathVariable int refundId,
-            @RequestParam("refundEvidence") MultipartFile refundEvidence) {
-        Refund refund = refundService.completeTakingRefundOrder(refundId, refundEvidence);
-        return new ResponseData<>(HttpStatus.OK.value(), "Complete Taking Refund Order Successful", refund);
+    @PatchMapping("/{refundId}/completeTaking")
+    public ResponseData<Refund> completeTakingRefundOrder(@PathVariable int refundId, @RequestParam("refundEvidence") MultipartFile refundEvidence) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Complete Taking Refund Order Successful", refundService.completeTakingRefundOrder(refundId, refundEvidence));
     }
 
-    @PostMapping("/{refundId}/shopProcess")
+    @PatchMapping("/{refundId}/shopProcess")
     public ResponseData<Refund> changeStatusToShopProcess(@PathVariable int refundId) {
-        Refund refund = refundService.changeStatusToShopProcess(refundId);
-        return new ResponseData<>(HttpStatus.OK.value(), "Change Status To Shop Process Successful", refund);
+        return new ResponseData<>(HttpStatus.OK.value(), "Change Status To Shop Process Successful", refundService.changeStatusToShopProcess(refundId));
     }
 
-    @PostMapping("/{refundId}/refundMoney")
-    public ResponseData<Refund> changeStatusToRefundMoney(
-            @PathVariable int refundId,
-            @RequestParam String staffNote) {
-        Refund refund = refundService.changeStatusToRefundMoney(refundId, staffNote);
-        return new ResponseData<>(HttpStatus.OK.value(), "Change Status To Refund Money Successful", refund);
+    @PatchMapping("/{refundId}/refundMoney")
+    public ResponseData<Refund> changeStatusToRefundMoney(@PathVariable int refundId, @RequestParam String staffNote) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Change Status To Refund Money Successful", refundService.changeStatusToRefundMoney(refundId, staffNote));
     }
 
-    @PostMapping("/{refundId}/turnBack")
+    @PatchMapping("/{refundId}/turnBack")
     public ResponseData<Refund> turnBackRefundProducts(@PathVariable int refundId) {
-        Refund refund = refundService.turnBackRefundProducts(refundId);
-        return new ResponseData<>(HttpStatus.OK.value(), "Turn Back Refund Products Successful", refund);
+        return new ResponseData<>(HttpStatus.OK.value(), "Turn Back Refund Products Successful", refundService.turnBackRefundProducts(refundId));
     }
 
-    @PostMapping("/{refundId}/completeDelivery")
-    public ResponseData<Refund> completeDeliveryBackRefundOrder(
-            @PathVariable int refundId,
-            @RequestParam("imgShip") MultipartFile imgShip) {
-        Refund refund = refundService.completeDeliveryBackRefundOrder(refundId, imgShip);
-        return new ResponseData<>(HttpStatus.OK.value(), "Complete Delivery Back Refund Order Successful", refund);
+    @PatchMapping("/{refundId}/completeDelivery")
+    public ResponseData<Refund> completeDeliveryBackRefundOrder(@PathVariable int refundId, @RequestParam("imgShip") MultipartFile imgShip) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Complete Delivery Back Refund Order Successful", refundService.completeDeliveryBackRefundOrder(refundId, imgShip));
     }
 }
 

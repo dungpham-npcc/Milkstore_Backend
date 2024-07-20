@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class RefundService implements IRefundService{
+public class RefundService implements IRefundService {
 
 
     private final RefundRepository refundRepository;
@@ -33,7 +33,7 @@ public class RefundService implements IRefundService{
     @Transactional
     public Refund createRefundRequest(int userID, RefundDTO refundDTO, MultipartFile refundImageFile) {
 
-        if(refundImageFile == null || refundImageFile.isEmpty()) {
+        if (refundImageFile == null || refundImageFile.isEmpty()) {
             throw new AppException(ErrorCode.REFUND_REQUEST_NEED_CUSTOMER_IMAGE);
         }
 
@@ -50,9 +50,11 @@ public class RefundService implements IRefundService{
 
         try {
             String imgUrl = firebaseService.upload(refundImageFile);
+            if(imgUrl.isEmpty()){
+                throw new AppException(ErrorCode.REFUND_IMAGE_NOT_FOUND);
+            }
             refund.setCustomerImage(imgUrl);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Failed to upload Image", e);
         }
         return refundRepository.save(refund);
@@ -61,8 +63,12 @@ public class RefundService implements IRefundService{
     //This function make to All user can get their refund Request by User Id
     @Override
     @Transactional
-    public Optional<Refund> getRefundRequestByUserId(int userId) {
-        return refundRepository.findById(userId);
+    public Refund getRefundRequestByUserId(int userId) {
+        Refund refund = refundRepository.findByUserId(userId);
+        if (refund == null) {
+            throw new AppException(ErrorCode.REFUND_NOT_FOUND);
+        }
+        return refund;
     }
 
     //This function make to Staff can get all refund request from customer
@@ -75,37 +81,32 @@ public class RefundService implements IRefundService{
     //This function make to customer can change their refundImage again
     @Override
     @Transactional
-    public Refund updateRefundImage(int userId, int refundId, MultipartFile refundImage) {
+    public Refund updateRefundImage(int refundId, MultipartFile refundImage) {
         Refund refund = refundRepository.findById(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
         String imgUrl = firebaseService.upload(refundImage);
-
         refund.setCustomerImage(imgUrl);
         return refundRepository.save(refund);
-
     }
 
     //This function make to customer can cancel Refund Request in their side
     @Transactional
     public Refund cancelRefundRequestForCustomer(int refundId) {
-        Refund refund = refundRepository.findById(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
-
+        Refund refund = refundRepository.findById(refundId).orElseThrow(() -> new AppException(ErrorCode.REFUND_NOT_FOUND));
         if (refund.getRefundStatus() == RefundStatus.IN_PROGRESSING) {
             refund.setRefundStatus(RefundStatus.CANCEL_REFUND_REQUEST);
             return refundRepository.save(refund);
         } else {
             throw new AppException(ErrorCode.INVALID_REFUND_REQUEST);
-            }
         }
+    }
 
     //This function make to staff can not confirm refund Request, phase 1, without real condition of refund product
     @Override
     @Transactional
     public Refund canNotConfirmRefundRequest(int refundId, String cancelReason) {
-
         Refund refund = refundRepository.findById(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
-
-        if(refund.getRefundStatus() == RefundStatus.IN_PROGRESSING) {
-            if(cancelReason == null || cancelReason.trim().isEmpty()) {
+        if (refund.getRefundStatus() == RefundStatus.IN_PROGRESSING) {
+            if (cancelReason == null || cancelReason.trim().isEmpty()) {
                 throw new AppException(ErrorCode.DENY_REFUND_REQUEST_NEED_REASON);
             }
             refund.setRefundStatus(RefundStatus.CANNOT_CONFIRM_REQUEST);
@@ -123,7 +124,6 @@ public class RefundService implements IRefundService{
     @Transactional
     public Refund confirmRequestRefund(int refundId) {
         Refund refund = refundRepository.findById(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
-
         if (refund.getRefundStatus() == RefundStatus.IN_PROGRESSING) {
             refund.setRefundStatus(RefundStatus.TAKING_PRODUCT_PROGRESSING);
             return refundRepository.save(refund);
@@ -136,24 +136,32 @@ public class RefundService implements IRefundService{
     @Override
     @Transactional
     public Refund completeTakingRefundOrder(int refundId, MultipartFile refundEvidence) {
-        Refund refund = getRefundRequestByUserId(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
+        Optional<Refund> refundOptional = refundRepository.findById(refundId);
+        if (refundOptional.isEmpty()) {
+            throw new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND);
+        }
+        Refund refund = refundOptional.get();
         String imgUrl = firebaseService.upload(refundEvidence);
-        if(refund.getRefundStatus() == RefundStatus.TAKING_PRODUCT_PROGRESSING && refundEvidence != null) {
+        if (refund.getRefundStatus() == RefundStatus.TAKING_PRODUCT_PROGRESSING && refundEvidence != null) {
             refund.setRefundStatus(RefundStatus.CONFIRM_TAKING);
             refund.setStaffReceivedImage(imgUrl);
         } else {
-            throw  new AppException(ErrorCode.INVALID_REFUND_REQUEST_STATUS);
+            throw new AppException(ErrorCode.INVALID_REFUND_REQUEST_STATUS);
         }
 
-        return  refundRepository.save(refund);
+        return refundRepository.save(refund);
     }
 
     //This function make to staff change status from CompleteTakingRefundOrder to ShopProcess and show it customer
     @Override
     @Transactional
     public Refund changeStatusToShopProcess(int refundId) {
-        Refund refund = getRefundRequestByUserId(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
-        if(refund.getRefundStatus() == RefundStatus.CONFIRM_TAKING) {
+        Optional<Refund> refundOptional = refundRepository.findById(refundId);
+        if (refundOptional.isEmpty()) {
+            throw new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND);
+        }
+        Refund refund = refundOptional.get();
+        if (refund.getRefundStatus() == RefundStatus.CONFIRM_TAKING) {
             refund.setRefundStatus(RefundStatus.SHOP_PROCESS);
         } else {
             throw new AppException(ErrorCode.INVALID_REFUND_REQUEST_STATUS);
@@ -166,13 +174,17 @@ public class RefundService implements IRefundService{
     @Override
     @Transactional
     public Refund changeStatusToRefundMoney(int refundId, String staffNote) {
-        Refund refund = getRefundRequestByUserId(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
-        if(refund.getRefundStatus() == RefundStatus.SHOP_PROCESS) {
+        Optional<Refund> refundOptional = refundRepository.findById(refundId);
+        if (refundOptional.isEmpty()) {
+            throw new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND);
+        }
+        Refund refund = refundOptional.get();
+        if (refund.getRefundStatus() == RefundStatus.SHOP_PROCESS) {
             refund.setRefundStatus(RefundStatus.CONFIRM_REFUND_MONEY);
             refund.setStaffNote(staffNote);
             return refundRepository.save(refund);
         } else {
-            throw  new AppException(ErrorCode.INVALID_REFUND_REQUEST_STATUS);
+            throw new AppException(ErrorCode.INVALID_REFUND_REQUEST_STATUS);
         }
 
     }
@@ -181,9 +193,12 @@ public class RefundService implements IRefundService{
     @Override
     @Transactional
     public Refund denyRequestRefund(int refundId, MultipartFile denyImage, String staffRejectReason) {
-        Refund refund = getRefundRequestByUserId(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
-
-        if(refund.getRefundStatus() == RefundStatus.SHOP_PROCESS) {
+        Optional<Refund> refundOptional = refundRepository.findById(refundId);
+        if (refundOptional.isEmpty()) {
+            throw new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND);
+        }
+        Refund refund = refundOptional.get();
+        if (refund.getRefundStatus() == RefundStatus.SHOP_PROCESS) {
             refund.setRefundStatus(RefundStatus.CANNOT_ACCEPT_REFUND_REQUEST);
             refund.setStaffRejectReason(staffRejectReason);
             String imgUrl = firebaseService.upload(denyImage);
@@ -198,9 +213,12 @@ public class RefundService implements IRefundService{
     @Override
     @Transactional
     public Refund turnBackRefundProducts(int refundId) {
-        Refund refund = getRefundRequestByUserId(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
-
-        if(refund.getRefundStatus() == RefundStatus.CANNOT_ACCEPT_REFUND_REQUEST) {
+        Optional<Refund> refundOptional = refundRepository.findById(refundId);
+        if (refundOptional.isEmpty()) {
+            throw new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND);
+        }
+        Refund refund = refundOptional.get();
+        if (refund.getRefundStatus() == RefundStatus.CANNOT_ACCEPT_REFUND_REQUEST) {
             refund.setRefundStatus(RefundStatus.DELIVERY_TO_TURN_BACK);
             return refundRepository.save(refund);
         } else {
@@ -210,14 +228,18 @@ public class RefundService implements IRefundService{
 
     @Override
     public Refund completeDeliveryBackRefundOrder(int refundId, MultipartFile imgShip) {
-        Refund refund = getRefundRequestByUserId(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
+        Optional<Refund> refundOptional = refundRepository.findById(refundId);
+        if (refundOptional.isEmpty()) {
+            throw new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND);
+        }
+        Refund refund = refundOptional.get();
         String imgUrl = firebaseService.upload(imgShip);
-        if(refund.getRefundStatus() == RefundStatus.DELIVERY_TO_TURN_BACK && imgShip != null) {
+        if (refund.getRefundStatus() == RefundStatus.DELIVERY_TO_TURN_BACK && imgShip != null) {
             refund.setRefundStatus(RefundStatus.COMPLETE_TURN_BACK);
             refund.setStaffReceivedImage(imgUrl);
-            return  refundRepository.save(refund);
+            return refundRepository.save(refund);
         } else {
-            throw  new AppException(ErrorCode.INVALID_REFUND_REQUEST_STATUS);
+            throw new AppException(ErrorCode.INVALID_REFUND_REQUEST_STATUS);
         }
     }
 

@@ -59,8 +59,9 @@ public enum ErrorCode {
     COMPLETE_RETURN_REFUND_ORDER_NEED_IMAGE(41, "Hoàn thành trả lại đơn hàng hoàn trả cần ảnh từ shipper"),
     NO_REFUND_REQUEST_FOUND(42, "Không có yêu cầu hoàn trã nào được tìm thấy"),
     INVALID_REFUND_REQUEST(43, "Yêu cầu hoàn trã không hợp lệ"),
-    INVALID_REFUND_REQUEST_STATUS(44, "Trạng thái của yêu cầu hoàn trã không hợp lệ");
-
+    INVALID_REFUND_REQUEST_STATUS(44, "Trạng thái của yêu cầu hoàn trã không hợp lệ"),
+    REFUND_NOT_FOUND(45, "KHông tìm thấy đơn hoàn trả"),
+    REFUND_IMAGE_NOT_FOUND(46, "Yêu cầu hình ảnh");
 
 
 
