@@ -38,6 +38,7 @@ public class RefundService implements IRefundService {
         }
 
         Refund refund = new Refund();
+        validateRefund(refundDTO);
         refund.setUserId(userID);
         refund.setSenderName(refundDTO.getSenderName());
         refund.setSenderAddress(refundDTO.getSenderAddress());
@@ -58,6 +59,14 @@ public class RefundService implements IRefundService {
             throw new RuntimeException("Failed to upload Image", e);
         }
         return refundRepository.save(refund);
+    }
+
+    private void validateRefund(RefundDTO refundDTO) {
+        if(refundDTO.getCustomerRefundReason().isEmpty()) throw new AppException(ErrorCode.CUSTOMER_REFUND_REASON_EMPTY);
+        if(refundDTO.getSenderPhone().isEmpty()) throw new AppException(ErrorCode.CUSTOMER_PHONE_EMPTY);
+        if(refundDTO.getSenderAddress().isEmpty()) throw new AppException(ErrorCode.CUSTOMER_ADDRESS_EMPTY);
+        if(refundDTO.getProductName().isEmpty()) throw new AppException(ErrorCode.PRODUCT_NAME_EMPTY);
+        if(refundDTO.getSenderName().isEmpty()) throw new AppException(ErrorCode.CUSTOMER_NAME_EMPTY);
     }
 
     //This function make to All user can get their refund Request by User Id
@@ -84,6 +93,7 @@ public class RefundService implements IRefundService {
     public Refund updateRefundImage(int refundId, MultipartFile refundImage) {
         Refund refund = refundRepository.findById(refundId).orElseThrow(() -> new AppException(ErrorCode.NO_REFUND_REQUEST_FOUND));
         String imgUrl = firebaseService.upload(refundImage);
+
         refund.setCustomerImage(imgUrl);
         return refundRepository.save(refund);
     }

@@ -61,7 +61,12 @@ public enum ErrorCode {
     INVALID_REFUND_REQUEST(43, "Yêu cầu hoàn trã không hợp lệ"),
     INVALID_REFUND_REQUEST_STATUS(44, "Trạng thái của yêu cầu hoàn trã không hợp lệ"),
     REFUND_NOT_FOUND(45, "KHông tìm thấy đơn hoàn trả"),
-    REFUND_IMAGE_NOT_FOUND(46, "Yêu cầu hình ảnh");
+    REFUND_IMAGE_NOT_FOUND(46, "Yêu cầu hình ảnh"),
+    CUSTOMER_REFUND_REASON_EMPTY(47, "Lý do hoàn trả của khách hàng trống"),
+    CUSTOMER_PHONE_EMPTY(48, "Số điện thoại của khách hàng không được để trống"),
+    CUSTOMER_ADDRESS_EMPTY(49, "Địa chỉ khác hàng không được để trống"),
+    PRODUCT_NAME_EMPTY(50, "Tên sản phẩm không được để trống"),
+    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống");
 
 
 

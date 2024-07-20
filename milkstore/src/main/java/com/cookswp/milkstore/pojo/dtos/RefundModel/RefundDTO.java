@@ -12,13 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RefundDTO {
 
-    private int userId;
     private String senderName;
     private String senderAddress;
     private String senderPhone;
     private String productName;
     private String customerRefundReason;
     private String customerNote;
-    private String customerImage;
 
 }
