@@ -36,11 +36,12 @@ public class CustomFormLoginSuccessHandler extends SimpleUrlAuthenticationSucces
                                         Authentication authentication) throws IOException, ServletException {
         User user = (User) authentication.getPrincipal();
         String jwt = jwtUtils.generateJwtToken(authentication);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("id", user.getUserId());
-        String encodedUsername = new String(user.getUsername().getBytes(), StandardCharsets.UTF_8);
-        userMap.put("username", encodedUsername);
+        userMap.put("email", user.getEmailAddress());
+        userMap.put("username", user.getUsername());
         userMap.put("role", user.getRole().getRoleName());
         userMap.put("phone", user.getPhoneNumber());
         response.getWriter().write(String.format("{\"token\": \"%s\", \"user\": %s}", jwt, new ObjectMapper().writeValueAsString(userMap)));

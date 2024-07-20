@@ -1,11 +1,13 @@
 package com.cookswp.milkstore.api;
 
 import com.cookswp.milkstore.pojo.dtos.AddressModel.AddressDTO;
+import com.cookswp.milkstore.pojo.entities.User;
 import com.cookswp.milkstore.pojo.entities.UserAddress;
 import com.cookswp.milkstore.response.ResponseData;
 import com.cookswp.milkstore.service.address.AddressService;
 import com.cookswp.milkstore.service.role.RoleService;
 import com.cookswp.milkstore.service.user.UserService;
+import net.minidev.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,18 +22,21 @@ public class AddressController {
 
     private final AddressService addressService;
 
+    private final UserService userService;
+
     @Autowired
-    public AddressController(AddressService addressService, ModelMapper mapper){
+    public AddressController(AddressService addressService, ModelMapper mapper, UserService userService){
         this.addressService = addressService;
         this.mapper = mapper;
+        this.userService = userService;
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseData<List<AddressDTO>> getAllAddressesOfUser(@PathVariable int userId){
+    public ResponseData<List<AddressDTO>> getAllAddressesOfUser(){
         return new ResponseData<>(HttpStatus.OK.value(),
                 "Addresses retrieved successfully!",
-                addressService.getAllAddressesOfUser(userId).stream()
+                addressService.getAllAddressesOfUser(userService.getCurrentUser().getUserId()).stream()
                         .map(address ->
                                 mapper.map(address, AddressDTO.class)
                         )
@@ -47,10 +52,10 @@ public class AddressController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public ResponseData<AddressDTO> addAddress(AddressDTO address){
+    public ResponseData<AddressDTO> addAddress(@RequestBody AddressDTO address){
         if (address.getDistrict() == null ||
         address.getAddressLine() == null)
-            throw new IllegalArgumentException("Address line and district ");
+            throw new IllegalArgumentException("Địa chỉ và quận huyện không được để trống");
 
         UserAddress addressToAdd = mapper.map(address, UserAddress.class);
         addressService.createAddress(addressToAdd);
@@ -59,7 +64,7 @@ public class AddressController {
 
     @PutMapping("/{addressId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseData<AddressDTO> updateAddress(@PathVariable int addressId, AddressDTO address){
+    public ResponseData<AddressDTO> updateAddress(@PathVariable int addressId, @RequestBody AddressDTO address){
         if (address.getDistrict() == null ||
                 address.getAddressLine() == null)
             throw new IllegalArgumentException("Address line and district ");
@@ -80,6 +85,16 @@ public class AddressController {
     @PatchMapping("/set-default/{addressId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseData<AddressDTO> setDefaultAddress(@PathVariable int addressId){
+        User user = userService.getCurrentUser();
+        List<UserAddress> addresses = addressService
+                .getAllAddressesOfUser(user.getUserId());
+        for (var item:
+             addresses) {
+            if (item.isDefault()) {
+                addressService.unsetDefaultAddress(item.getId());
+                break;
+            }
+        }
         addressService.setDefaultAddress(addressId);
         return new ResponseData<>(HttpStatus.OK.value(), "Address set to default!", null);
     }

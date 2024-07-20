@@ -64,8 +64,8 @@ public class UserController {
     public ResponseData<UserRegistrationDTO> getStaff(@PathVariable int id){
         AuthorizationUtils.checkAuthorization("ADMIN");
         return new ResponseData<>(HttpStatus.OK.value(),
-                "Staff retrieved successfully!",
-                mapper.map(userService.getUserById(id), UserRegistrationDTO.class));
+                userService.getUserById(id) != null ? "Staff retrieved successfully!" : "No such staff exists!",
+                userService.getUserById(id) != null ? mapper.map(userService.getUserById(id), UserRegistrationDTO.class) : null);
     }
 
     @GetMapping("/member")
@@ -73,7 +73,7 @@ public class UserController {
     public ResponseData<UserDTO> getMember(String email){
         AuthorizationUtils.checkAuthorization("ADMIN");
         return new ResponseData<>(HttpStatus.OK.value(),
-                "List retrieved successfully!",
+                "Member retrieved successfully!",
                 mapper.map(userService.getUserByEmail(email), UserDTO.class));
     }
 

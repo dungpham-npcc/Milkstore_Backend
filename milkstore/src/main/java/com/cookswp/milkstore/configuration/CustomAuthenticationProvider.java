@@ -42,7 +42,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 throw new BadCredentialsException("Invalid credentials!");
 
             else if (!user.isEnabled() || !user.isAccountNonLocked())
-                throw new UserInvisibilityException("Tài khoản này có thể đã bị xóa hoặc bị hạn chế, vui lòng liên hệ quản trị viên để biết thông tin chi tiết.");
+                throw new UserInvisibilityException("Tài khoản này đã bị hạn chế, vui lòng liên hệ quản trị viên để biết thông tin chi tiết.");
 
         } catch (UsernameNotFoundException | BadCredentialsException | UserInvisibilityException e) {
             System.out.println("Validation exceptions: " + e.getMessage());
