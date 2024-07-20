@@ -52,4 +52,10 @@ public class TransactionLog {
     private String txnRef;
 
     // Constructors, getters, setters, etc.
+
+
+    @Override
+    public String toString() {
+        return "TransactionLog{" + "transactionId=" + transactionId + ", amount=" + amount + ", bankCode='" + bankCode + '\'' + ", bankTranNo='" + bankTranNo + '\'' + ", cardType='" + cardType + '\'' + ", orderInfo='" + orderInfo + '\'' + ", responseCode='" + responseCode + '\'' + ", payDate='" + payDate + '\'' + ", transactionNo='" + transactionNo + '\'' + ", transactionStatus='" + transactionStatus + '\'' + ", txnRef='" + txnRef + '\'' + '}';
+    }
 }
