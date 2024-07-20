@@ -110,6 +110,7 @@ public class VNPayServiceImpl implements VNPayService {
                 .build();
         transactionLogRepository.save(trans);
         String responseCode = requestCallBack.getResponseCode();
+        System.out.println(trans);
         String message = responseCode.equals("00") ? "Giao dịch thành công" : "Giao dịch thất bại";
         orderService.updateOrderStatus(trans.getTxnRef());
         return PaymentDTO.builder()
