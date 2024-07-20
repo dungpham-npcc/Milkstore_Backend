@@ -35,6 +35,9 @@ public class OrderItem {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    @Column(name = "product_image", nullable = false)
+    private String productImage;
+
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 

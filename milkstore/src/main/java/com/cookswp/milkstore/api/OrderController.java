@@ -3,12 +3,10 @@ package com.cookswp.milkstore.api;
 import com.cookswp.milkstore.pojo.dtos.OrderModel.CreateOrderRequest;
 import com.cookswp.milkstore.pojo.dtos.OrderModel.OrderDTO;
 import com.cookswp.milkstore.pojo.entities.Order;
-import com.cookswp.milkstore.pojo.entities.OrderItem;
 import com.cookswp.milkstore.response.ResponseData;
 import com.cookswp.milkstore.service.order.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,6 +46,7 @@ public class OrderController {
     public ResponseData<Order> updateOrder(@PathVariable String id, @RequestBody OrderDTO orderDTO) {
         return new ResponseData<>(HttpStatus.ACCEPTED.value(), "UPDATE ORDER", orderService.updateOrder(id, orderDTO));
     }
+
 
     //This API use to DeleteOrder for the staff
     @DeleteMapping("/{id}")

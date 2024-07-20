@@ -11,11 +11,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository <Order, String> {
+public interface OrderRepository extends JpaRepository<Order, String> {
 
-    Optional<Order> findById(String id);
+    @Query("SELECT o FROM Order o WHERE o.id =:id")
+    Optional<Order> findById(@Param("id") String id);
 
-    List<Order> findByUserId (int userId);
+    List<Order> findByUserId(int userId);
 
     @Query("SELECT COUNT(o.id) AS numberOfOrders FROM Order o WHERE o.orderStatus = :orderStatus")
     Long getNumberOfOrdersByStatus(@Param("orderStatus") Status orderStatus);
@@ -37,6 +38,9 @@ public interface OrderRepository extends JpaRepository <Order, String> {
 
     @Query("SELECT MONTH(o.orderDate), COUNT(o.id) FROM Order o WHERE YEAR(o.orderDate) = :year GROUP BY MONTH(o.orderDate)")
     List<Object[]> getOrderCountsByMonth(@Param("year") int year);
+
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.cart WHERE o.id = :orderID")
+    Optional<Order> findByIdWithCart(@Param("orderID") String orderID);
 
 
 }
