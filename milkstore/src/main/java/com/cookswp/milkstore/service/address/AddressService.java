@@ -58,4 +58,12 @@ public class AddressService {
         addressRepository.save(currentAddress);
     }
 
+    public void unsetDefaultAddress(int id){
+        UserAddress currentAddress = addressRepository.findById(id);
+        if (currentAddress == null) throw new IllegalArgumentException("Address not found");
+
+        currentAddress.setDefault(false);
+        addressRepository.save(currentAddress);
+    }
+
 }
