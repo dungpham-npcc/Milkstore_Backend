@@ -26,7 +26,7 @@ public class ShoppingCart implements Serializable {
     @JsonManagedReference
     private List<ShoppingCartItem> items;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private Status status;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "status")
+//    private Status status;
 }

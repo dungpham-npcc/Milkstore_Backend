@@ -3,13 +3,13 @@ package com.cookswp.milkstore.service.order;
 import com.cookswp.milkstore.enums.Status;
 import com.cookswp.milkstore.exception.AppException;
 import com.cookswp.milkstore.exception.ErrorCode;
+import com.cookswp.milkstore.pojo.dtos.CartModel.ShowCartModelDTO;
 import com.cookswp.milkstore.pojo.dtos.OrderModel.CreateOrderRequest;
 import com.cookswp.milkstore.pojo.dtos.OrderModel.OrderDTO;
 import com.cookswp.milkstore.pojo.dtos.OrderModel.OrderItemDTO;
 import com.cookswp.milkstore.pojo.entities.*;
 import com.cookswp.milkstore.repository.order.OrderRepository;
 import com.cookswp.milkstore.repository.orderItem.OrderItemRepository;
-import com.cookswp.milkstore.repository.product.ProductRepository;
 import com.cookswp.milkstore.repository.shoppingCart.ShoppingCartRepository;
 import com.cookswp.milkstore.repository.shoppingCartItem.ShoppingCartItemRepository;
 import com.cookswp.milkstore.repository.transactionLog.TransactionLogRepository;
@@ -44,10 +44,11 @@ public class OrderService implements IOrderService {
 
 
     private final FirebaseService firebaseService;
+    private final ShoppingCartService shoppingCartService;
     private final ShoppingCartRepository shoppingCartRepository;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository, FirebaseService firebaseService, ShoppingCartRepository shoppingCartRepository) {
+    public OrderService(OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository,  FirebaseService firebaseService, ShoppingCartService shoppingCartService, ShoppingCartRepository shoppingCartRepository) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.shoppingCartItemRepository = shoppingCartItemRepository;
@@ -55,6 +56,7 @@ public class OrderService implements IOrderService {
         this.userRepository = userRepository;
         this.orderItemRepository = orderItemRepository;
         this.firebaseService = firebaseService;
+        this.shoppingCartService = shoppingCartService;
         this.shoppingCartRepository = shoppingCartRepository;
     }
 
@@ -132,10 +134,9 @@ public class OrderService implements IOrderService {
                 List<OrderItem> orderItems = new ArrayList<>();
                 for (ShoppingCartItem cartItem : shoppingCart.getItems()) {
                     OrderItem orderItem = new OrderItem();
-                    orderItem.setOrderId(order.getId());
+                    orderItem.setOrderId(order.getId()); // Thiết lập orderId từ đối tượng Order
                     orderItem.setProductId(cartItem.getProduct().getProductID());
                     orderItem.setProductName(cartItem.getProduct().getProductName());
-                    orderItem.setProductImage(cartItem.getProduct().getProductImage());
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPrice(cartItem.getProduct().getPrice());
                     orderItems.add(orderItem);
@@ -146,8 +147,10 @@ public class OrderService implements IOrderService {
                 shoppingCart.getItems().clear();
                 shoppingCartRepository.save(shoppingCart);
             }
-        }
-        return orderRepository.save(order);
+        //BAO BEU
+        }//add new
+        orderRepository.save(order);
+        return order;
     }
 
     @Override
@@ -165,14 +168,7 @@ public class OrderService implements IOrderService {
 
     @Override
     public Order getOrderById(String id) {
-       Optional<Order> optionalOrder = orderRepository.findByIdWithCart(id);
-       if(optionalOrder.isEmpty()) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
-        System.out.println("Order fetched: " + optionalOrder.get().getId());
-        System.out.println("Cart size: " + optionalOrder.get().getCart().size());
-        for (OrderItem item : optionalOrder.get().getCart()) {
-            System.out.println("Item: " + item.getProductName());
-        }
-       return optionalOrder.get();
+        return orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
     public List<OrderItem> getOrderItemsByOrderId(String orderId) {
@@ -195,7 +191,6 @@ public class OrderService implements IOrderService {
     @Transactional
     public Order cancelOrder(String OrderId, String reason) {
         Order order = getOrderById(OrderId);
-        order.setFailureReasonNote(reason);
         String reasons = order.getFailureReasonNote();
         String[] token = reasons.split(";");
         List<String> reasonList = Arrays.asList(token);
@@ -206,7 +201,7 @@ public class OrderService implements IOrderService {
         } else if (reasonList.size() == 1) {
             order.setFailureReasonNote(reasonList.get(0)
             + ";" + reason + "|" + LocalDateTime.now());
-            order.setOrderStatus(Status.CANNOT_DELIVER);
+            order.setOrderStatus(Status.CANNOT_CONFRIRM);
         } else {
             throw new RuntimeException("Can not cancel order more than 2 times");
         }
