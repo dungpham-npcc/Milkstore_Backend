@@ -107,9 +107,6 @@ public class OrderService implements IOrderService {
         if (!hasSpecialCharacters(orderRequest.getReceiverName())) {
             throw new AppException(ErrorCode.RECEIVER_NAME_INVALID);
         }
-        if(hasSpecialCharacters(orderRequest.getShippingAddress())) {
-            throw new AppException(ErrorCode.SHIPPING_ADDRESS_INVALID);
-        }
         if (orderRequest.getShippingAddress().trim().equals(" ")) {
             throw new AppException(ErrorCode.SHIPPING_ADDRESS_EMPTY);
         }
