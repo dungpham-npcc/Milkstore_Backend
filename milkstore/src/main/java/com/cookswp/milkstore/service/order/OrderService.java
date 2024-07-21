@@ -9,12 +9,14 @@ import com.cookswp.milkstore.pojo.dtos.OrderModel.OrderItemDTO;
 import com.cookswp.milkstore.pojo.entities.*;
 import com.cookswp.milkstore.repository.order.OrderRepository;
 import com.cookswp.milkstore.repository.orderItem.OrderItemRepository;
+import com.cookswp.milkstore.repository.product.ProductRepository;
 import com.cookswp.milkstore.repository.shoppingCart.ShoppingCartRepository;
 import com.cookswp.milkstore.repository.shoppingCartItem.ShoppingCartItemRepository;
 import com.cookswp.milkstore.repository.transactionLog.TransactionLogRepository;
 import com.cookswp.milkstore.repository.user.UserRepository;
 import com.cookswp.milkstore.service.firebase.FirebaseService;
 import com.cookswp.milkstore.service.product.ProductService;
+import com.cookswp.milkstore.service.shoppingcart.ShoppingCartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,22 +73,24 @@ public class OrderService implements IOrderService {
     public Order createOrder(int userID, CreateOrderRequest orderDTO) {
         User user = userRepository.findByUserId(userID);
         if (user == null) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
+            throw new RuntimeException("User not found");
         }
         validateCheckOut(orderDTO);
         Order order = new Order();
         UUID id = UUID.randomUUID();
         order.setId(id.toString());
         order.setUserId(userID);
+        //order.setCarID(orderDTO.getCartID());
         order.setReceiverName(orderDTO.getReceiverName());
         order.setReceiverPhone(orderDTO.getReceiverPhoneNumber());
         order.setOrderStatus(Status.IN_CART);
         order.setTotalPrice(orderDTO.getTotalPrice());
         order.setOrderDate(LocalDateTime.now());
         order.setShippingAddress(orderDTO.getShippingAddress());
+       // order.setCart(orderDTO.);
 
         //Save Cart Information before clear Cart
-        if (orderDTO.getItems() != null) {
+        if(orderDTO.getItems() != null){
             saveOrderItems(order, orderDTO.getItems());
         }
 
@@ -205,14 +209,14 @@ public class OrderService implements IOrderService {
 
     @Override
     public Order getOrderById(String id) {
-        Optional<Order> optionalOrder = orderRepository.findByIdWithCart(id);
-        if (optionalOrder.isEmpty()) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+       Optional<Order> optionalOrder = orderRepository.findByIdWithCart(id);
+       if(optionalOrder.isEmpty()) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         System.out.println("Order fetched: " + optionalOrder.get().getId());
         System.out.println("Cart size: " + optionalOrder.get().getCart().size());
         for (OrderItem item : optionalOrder.get().getCart()) {
             System.out.println("Item: " + item.getProductName());
         }
-        return optionalOrder.get();
+       return optionalOrder.get();
     }
 
     public List<OrderItem> getOrderItemsByOrderId(String orderId) {
@@ -240,12 +244,12 @@ public class OrderService implements IOrderService {
         String[] token = reasons.split(";");
         List<String> reasonList = Arrays.asList(token);
 
-        if (reasonList.isEmpty()) {
+        if(reasonList.isEmpty()) {
             order.setFailureReasonNote(reason + "|" + LocalDateTime.now());
             order.setOrderStatus(Status.CANNOT_DELIVER);
         } else if (reasonList.size() == 1) {
             order.setFailureReasonNote(reasonList.get(0)
-                    + ";" + reason + "|" + LocalDateTime.now());
+            + ";" + reason + "|" + LocalDateTime.now());
             order.setOrderStatus(Status.CANNOT_DELIVER);
         } else {
             throw new RuntimeException("Can not cancel order more than 2 times");
@@ -273,7 +277,7 @@ public class OrderService implements IOrderService {
         if (order.getOrderStatus() == Status.CANNOT_DELIVER) {
             order.setOrderStatus(Status.IN_DELIVERY);
             return orderRepository.save(order);
-        } else {
+        } else{
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
     }
@@ -321,9 +325,8 @@ public class OrderService implements IOrderService {
         order.setShippingAddress(orderDTO.getShippingAddress());
         return order;
     }
-
     @Override
-    public Long getNumberOfOrdersByStatus(String status) throws IllegalArgumentException {
+    public Long getNumberOfOrdersByStatus(String status) throws IllegalArgumentException{
         return orderRepository.getNumberOfOrdersByStatus(Status.valueOf(status));
     }
 

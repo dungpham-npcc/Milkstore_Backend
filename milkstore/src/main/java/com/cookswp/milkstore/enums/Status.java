@@ -10,7 +10,8 @@ public enum Status {
     CANNOT_DELIVER(6,"Delivery cannot be completed"),
     DELIVERED(7,"Product has been delivered"),
     COMPLETE_EXCHANGE(8,"Completed all flow of buying"),
-    CANNOT_CONFRIRM(9, "Can not confirm with some reason");
+    CANNOT_CONFRIRM(9, "Can not confirm with some reason"),
+    IS_FEEDBACK(10, "User had been feedback");
 
     private final int code;
     private final String message;
