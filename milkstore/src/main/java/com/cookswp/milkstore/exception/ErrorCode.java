@@ -66,7 +66,16 @@ public enum ErrorCode {
     CUSTOMER_PHONE_EMPTY(48, "Số điện thoại của khách hàng không được để trống"),
     CUSTOMER_ADDRESS_EMPTY(49, "Địa chỉ khác hàng không được để trống"),
     PRODUCT_NAME_EMPTY(50, "Tên sản phẩm không được để trống"),
-    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống");
+    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống"),
+    USER_NOT_FOUND(52, "Không tìm thấy khác hàng"),
+    RECEIVER_NAME_EMPTY(53, "Tên người nhận không được để trống"),
+    PHONE_NUMBER_EMPTY(54, "Số điện thoại nhận hàng không được để trống"),
+    INVALID_PHONE_NUMBER(55, "Số điện thoại phải có 10 số"),
+    SHIPPING_ADDRESS_EMPTY(56, "Địa chỉ nhận hàng không được để trống"),
+    SHIPPING_ADDRESS_NOT_ENOUGH_FIELD(57, "Địa chỉ nhận hàng phải có quận"),
+    INVALID_PHONE_NUMBER_START_WITH_ZERO(58, "Số điện thọai phải bắt đầu từ số 0"),
+    RECEIVER_NAME_INVALID(59, "Tên người nhận không được chứa kí tự đặc biệt"),
+    PHONE_NUMBER_MUST_CONTAIN_NUMBERS(60, "Số điện thoại phải chứa số nguyên");
 
 
 
