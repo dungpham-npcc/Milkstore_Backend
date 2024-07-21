@@ -29,7 +29,7 @@ public class RefundController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseData<Refund> getRefundRequestByUserId(@PathVariable int userId) {
+    public ResponseData<List<Refund>> getRefundRequestByUserId(@PathVariable int userId) {
         return new ResponseData<>(HttpStatus.OK.value(), "Get Refund Request By User ID", refundService.getRefundRequestByUserId(userId));
     }
 

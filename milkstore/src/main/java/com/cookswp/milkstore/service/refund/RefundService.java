@@ -72,12 +72,12 @@ public class RefundService implements IRefundService {
     //This function make to All user can get their refund Request by User Id
     @Override
     @Transactional
-    public Refund getRefundRequestByUserId(int userId) {
-        Refund refund = refundRepository.findByUserId(userId);
-        if (refund == null) {
+    public List<Refund> getRefundRequestByUserId(int userId) {
+        List<Refund> refunds = refundRepository.findByUserId(userId);
+        if (refunds == null || refunds.isEmpty()) {
             throw new AppException(ErrorCode.REFUND_NOT_FOUND);
         }
-        return refund;
+        return refunds;
     }
 
     //This function make to Staff can get all refund request from customer
