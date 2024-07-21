@@ -190,23 +190,35 @@ public class OrderService implements IOrderService {
 
     //Method to Cancel Order with Reason
     @Transactional
-    public Order cancelOrder(String OrderId, String reason) {
-        Order order = getOrderById(OrderId);
-        String reasons = order.getFailureReasonNote();
-        String[] token = reasons.split(";");
-        List<String> reasonList = Arrays.asList(token);
+    public Order cancelOrder(String orderId, String reason) {
+        Order order = getOrderById(orderId);
 
-        if(reasonList.isEmpty()) {
-            order.setFailureReasonNote(reason + "|" + LocalDateTime.now());
-            order.setOrderStatus(Status.CANNOT_DELIVER);
-        } else if (reasonList.size() == 1) {
-            order.setFailureReasonNote(reasonList.get(0)
-            + ";" + reason + "|" + LocalDateTime.now());
-            order.setOrderStatus(Status.CANNOT_CONFRIRM);
-        } else {
-            throw new RuntimeException("Can not cancel order more than 2 times");
+        if(reason.isEmpty()){
+            throw new AppException(ErrorCode.REASON_EMPTY);
         }
 
+        String existingReasons = order.getFailureReasonNote();
+        String combinedReasons = existingReasons != null && !existingReasons.isEmpty()
+                ? existingReasons + " ; " + reason
+                : reason;
+
+        String[] token = combinedReasons.split(";");
+        List<String> reasonList = Arrays.asList(token);
+
+        System.out.println(reasonList);
+
+        String failureReasonNote;
+        if (reasonList.size() == 1) {
+            failureReasonNote = reasonList.get(0).trim() + " | " + LocalDateTime.now();
+            order.setOrderStatus(Status.CANNOT_CONFRIRM);
+        } else if (reasonList.size() == 2) {
+            failureReasonNote = reasonList.get(0).trim() + " ; " + reasonList.get(1).trim() + " | " + LocalDateTime.now();
+            order.setOrderStatus(Status.CANNOT_DELIVER);
+        } else {
+            throw new AppException(ErrorCode.CANCEL_ORDER_ERROR);
+        }
+
+        order.setFailureReasonNote(failureReasonNote);
         return orderRepository.save(order);
     }
 

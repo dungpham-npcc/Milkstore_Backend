@@ -55,7 +55,9 @@ public enum ErrorCode {
     CUSTOMER_PHONE_EMPTY(48, "Số điện thoại của khách hàng không được để trống"),
     CUSTOMER_ADDRESS_EMPTY(49, "Địa chỉ khác hàng không được để trống"),
     PRODUCT_NAME_EMPTY(50, "Tên sản phẩm không được để trống"),
-    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống");
+    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống"),
+    REASON_EMPTY(52, "Lý do không được để trống"),
+    CANCEL_ORDER_ERROR(53, "Hủy đơn bị lỗi");
 
 
 
