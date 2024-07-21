@@ -36,7 +36,26 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(29, "Đơn hàng không tìm thấy"),
     INVALID_ORDER_STATUS(30, "Đơn hàng không có trạng thái đúng để xác định"),
     FEEDBACK_NOT_FOUND(31, "Không tìm thấy bài đánh giá"),
-    FEEDBACK_RATING_ERROR(32, "Đánh giá nên từ 1 đến 5 sao");
+    FEEDBACK_RATING_ERROR(32, "Đánh giá nên từ 1 đến 5 sao"),
+    REFUND_REQUEST_NEED_CUSTOMER_IMAGE(33, "Yêu cầu hoàn trã cần phải có ảnh từ khách hàng để cửa hàng có thể kiểm chứng"),
+    REFUND_REQUEST_NEED_CUSTOMER_REASON(34, "Yêu cầu hoàn trã cần lí do từ khách hàng để kiểm tra kết hợp với ảnh được cung cấp"),
+    DENY_REFUND_REQUEST_NEED_REASON(35, "Yêu cầu từ chối hoàn trả cần lí do"),
+    DENY_REFUND_REQUEST_NEED_IMAGE(36, "Yêu cầu từ chối hoàn trả cần ảnh"),
+    DENY_TAKE_REFUND_ORDER_NEED_REASON(37, "Yêu cầu từ chối nhận đơn hoàn trả cần lí do"),
+    CONFIRM_REFUND_ORDER_TAKING_NEED_IMAGE(38, "Xác nhận nhận đơn hoàn trả cần ảnh từ shipper"),
+    CANNOT_RECALL_REQUEST_ORDER_NEED_REASON(39, "Không thể thu hồi yêu cầu đơn hàng cần lí do từ shipper"),
+    CANNOT_RETURN_REFUND_ORDER_NEED_REASON(40, "Không thể trả lại đơn hàng hoàn trả cần lí do từ shipper"),
+    COMPLETE_RETURN_REFUND_ORDER_NEED_IMAGE(41, "Hoàn thành trả lại đơn hàng hoàn trả cần ảnh từ shipper"),
+    NO_REFUND_REQUEST_FOUND(42, "Không có yêu cầu hoàn trã nào được tìm thấy"),
+    INVALID_REFUND_REQUEST(43, "Yêu cầu hoàn trã không hợp lệ"),
+    INVALID_REFUND_REQUEST_STATUS(44, "Trạng thái của yêu cầu hoàn trã không hợp lệ"),
+    REFUND_NOT_FOUND(45, "KHông tìm thấy đơn hoàn trả"),
+    REFUND_IMAGE_NOT_FOUND(46, "Yêu cầu hình ảnh"),
+    CUSTOMER_REFUND_REASON_EMPTY(47, "Lý do hoàn trả của khách hàng trống"),
+    CUSTOMER_PHONE_EMPTY(48, "Số điện thoại của khách hàng không được để trống"),
+    CUSTOMER_ADDRESS_EMPTY(49, "Địa chỉ khác hàng không được để trống"),
+    PRODUCT_NAME_EMPTY(50, "Tên sản phẩm không được để trống"),
+    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống");
 
 
 
