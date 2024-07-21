@@ -44,12 +44,10 @@ public class OrderService implements IOrderService {
 
 
     private final FirebaseService firebaseService;
-    private final ShoppingCartService shoppingCartService;
     private final ShoppingCartRepository shoppingCartRepository;
-    private final ProductRepository productRepository;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository, FirebaseService firebaseService, ShoppingCartService shoppingCartService, ShoppingCartRepository shoppingCartRepository, ProductRepository productRepository) {
+    public OrderService(OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository, FirebaseService firebaseService, ShoppingCartRepository shoppingCartRepository) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.shoppingCartItemRepository = shoppingCartItemRepository;
@@ -57,9 +55,7 @@ public class OrderService implements IOrderService {
         this.userRepository = userRepository;
         this.orderItemRepository = orderItemRepository;
         this.firebaseService = firebaseService;
-        this.shoppingCartService = shoppingCartService;
         this.shoppingCartRepository = shoppingCartRepository;
-        this.productRepository = productRepository;
     }
 
 

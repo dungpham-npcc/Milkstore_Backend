@@ -44,8 +44,8 @@ public class RefundController {
     }
 
     @PatchMapping("/{refundId}/cancel")
-    public ResponseData<Refund> cancelRefundRequestForCustomer(@PathVariable int refundId) {
-        return new ResponseData<>(HttpStatus.OK.value(), "Cancel Refund Request Successful", refundService.cancelRefundRequestForCustomer(refundId));
+    public ResponseData<Refund> cancelRefundRequestForCustomer(@PathVariable int refundId, @RequestParam String reason) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Cancel Refund Request Successful", refundService.cancelRefundRequestForCustomer(refundId, reason));
     }
 
     @PatchMapping("/{refundId}/deny")

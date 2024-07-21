@@ -14,13 +14,10 @@ public interface IRefundService {
     List<Refund> getAllRefundRequest();
 
     Refund updateRefundImage(int refundId, MultipartFile refundImage);
-
-
     //Customer
-    Refund cancelRefundRequestForCustomer(int refundId);
+    Refund cancelRefundRequestForCustomer(int refundId, String reason);
 
     Refund createRefundRequest(int userID, RefundDTO refundDTO, MultipartFile refundImageFile);
-
 
     //Staff
     Refund canNotConfirmRefundRequest(int refundId, String cancelReason);

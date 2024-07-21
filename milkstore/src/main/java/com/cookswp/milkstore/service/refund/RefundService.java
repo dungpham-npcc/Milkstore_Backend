@@ -100,9 +100,10 @@ public class RefundService implements IRefundService {
 
     //This function make to customer can cancel Refund Request in their side
     @Transactional
-    public Refund cancelRefundRequestForCustomer(int refundId) {
+    public Refund cancelRefundRequestForCustomer(int refundId, String reason) {
         Refund refund = refundRepository.findById(refundId).orElseThrow(() -> new AppException(ErrorCode.REFUND_NOT_FOUND));
         if (refund.getRefundStatus() == RefundStatus.IN_PROGRESSING) {
+            refund.setStaffRejectReason(reason);
             refund.setRefundStatus(RefundStatus.CANCEL_REFUND_REQUEST);
             return refundRepository.save(refund);
         } else {
