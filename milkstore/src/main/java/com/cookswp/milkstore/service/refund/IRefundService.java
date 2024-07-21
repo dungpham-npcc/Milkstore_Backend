@@ -15,7 +15,7 @@ public interface IRefundService {
 
     Refund updateRefundImage(int refundId, MultipartFile refundImage);
     //Customer
-    Refund cancelRefundRequestForCustomer(int refundId, String reason);
+    Refund cancelRefundRequestForCustomer(int refundId);
 
     Refund createRefundRequest(int userID, RefundDTO refundDTO, MultipartFile refundImageFile);
 

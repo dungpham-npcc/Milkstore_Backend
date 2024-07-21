@@ -51,8 +51,8 @@ public class RefundController {
 
     //Todo This function make to customer can cancel refund request in their side
     @PatchMapping("/{refundId}/cancel")
-    public ResponseData<Refund> cancelRefundRequestForCustomer(@PathVariable int refundId, @RequestParam String reason) {
-        return new ResponseData<>(HttpStatus.OK.value(), "Cancel Refund Request Successful", refundService.cancelRefundRequestForCustomer(refundId, reason));
+    public ResponseData<Refund> cancelRefundRequestForCustomer(@PathVariable int refundId) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Cancel Refund Request Successful", refundService.cancelRefundRequestForCustomer(refundId));
     }
 
     //Todo This function make to Staff can deny RefundRequest from customer phase 2

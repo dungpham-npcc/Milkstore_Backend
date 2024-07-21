@@ -80,9 +80,9 @@ public enum ErrorCode {
 
 
 
-    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống"),
-    REASON_EMPTY(52, "Lý do không được để trống"),
-    CANCEL_ORDER_ERROR(53, "Hủy đơn bị lỗi");
+//    CUSTOMER_NAME_EMPTY(51, "Tên khách hàng không được để trống"),
+//    REASON_EMPTY(52, "Lý do không được để trống"),
+//    CANCEL_ORDER_ERROR(53, "Hủy đơn bị lỗi");
 
 
 
