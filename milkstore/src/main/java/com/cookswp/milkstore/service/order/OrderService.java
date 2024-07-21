@@ -125,6 +125,19 @@ public class OrderService implements IOrderService {
         if (!orderRequest.getShippingAddress().contains("Quận")) {
             throw new AppException(ErrorCode.SHIPPING_ADDRESS_NOT_ENOUGH_FIELD);
         }
+        String[] arrays = orderRequest.getShippingAddress().split("Quận");
+        boolean isValid = true;
+        for(int i = 0; i < arrays.length; i++){
+            if(i == 0){
+                if(arrays[i].trim().isEmpty()){
+                    isValid = false;
+                    break;
+                }
+            }
+        }
+        if(!isValid){
+            throw new AppException(ErrorCode.SHIPPING_ADDRESS_EMPTY);
+        }
     }
 
     private boolean hasSpecialCharacters(String input) {
