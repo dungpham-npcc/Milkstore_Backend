@@ -110,7 +110,7 @@ public class OrderService implements IOrderService {
         if(hasSpecialCharacters(orderRequest.getShippingAddress())) {
             throw new AppException(ErrorCode.SHIPPING_ADDRESS_INVALID);
         }
-        if (orderRequest.getShippingAddress().isEmpty()) {
+        if (orderRequest.getShippingAddress().trim().equals(" ")) {
             throw new AppException(ErrorCode.SHIPPING_ADDRESS_EMPTY);
         }
         if (!orderRequest.getShippingAddress().contains("Quận")) {
