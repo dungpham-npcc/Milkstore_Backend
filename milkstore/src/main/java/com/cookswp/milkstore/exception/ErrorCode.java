@@ -75,7 +75,8 @@ public enum ErrorCode {
     SHIPPING_ADDRESS_NOT_ENOUGH_FIELD(57, "Địa chỉ nhận hàng phải có quận"),
     INVALID_PHONE_NUMBER_START_WITH_ZERO(58, "Số điện thọai phải bắt đầu từ số 0"),
     RECEIVER_NAME_INVALID(59, "Tên người nhận không được chứa kí tự đặc biệt"),
-    PHONE_NUMBER_MUST_CONTAIN_NUMBERS(60, "Số điện thoại phải chứa số nguyên");
+    PHONE_NUMBER_MUST_CONTAIN_NUMBERS(60, "Số điện thoại phải chứa số nguyên"),
+    SHIPPING_ADDRESS_INVALID(61, "Địa chỉ không được chứa ký tự đặc biệt");
 
 
 
