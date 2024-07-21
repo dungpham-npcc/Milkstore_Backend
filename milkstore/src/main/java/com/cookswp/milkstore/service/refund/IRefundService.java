@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface IRefundService {
 
-    Refund getRefundRequestByUserId(int userId);
+    List<Refund> getRefundRequestByUserId(int userId);
 
     List<Refund> getAllRefundRequest();
 
