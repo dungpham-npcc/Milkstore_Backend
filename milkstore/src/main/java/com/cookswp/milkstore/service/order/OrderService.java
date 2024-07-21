@@ -101,6 +101,9 @@ public class OrderService implements IOrderService {
         if (orderRequest.getReceiverName().isEmpty()) {
             throw new AppException(ErrorCode.RECEIVER_NAME_EMPTY);
         }
+        if(!isValidVietnameseName(orderRequest.getReceiverName())){
+            throw new AppException(ErrorCode.RECEIVER_NAME_INVALID);
+        }
         if(hasSpecialCharacters(orderRequest.getReceiverName())){
             throw new AppException(ErrorCode.RECEIVER_NAME_INVALID);
         }
@@ -129,6 +132,13 @@ public class OrderService implements IOrderService {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         return matcher.find();
+    }
+
+    private boolean isValidVietnameseName(String input) {
+        String regex = "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽềềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ\\s]+$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        return matcher.matches();
     }
 
     private boolean checkNumberInPhoneNumbers(String input){
