@@ -129,7 +129,7 @@ public class OrderService implements IOrderService {
         boolean isValid = true;
         for(int i = 0; i < arrays.length; i++){
             if(i == 0){
-                if(arrays[i].trim().isEmpty()){
+                if(arrays[i].trim().isEmpty() || arrays[i].trim().equals(" ")){
                     isValid = false;
                     break;
                 }
