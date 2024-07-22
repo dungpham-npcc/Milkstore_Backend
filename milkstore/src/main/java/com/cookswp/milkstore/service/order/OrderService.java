@@ -87,10 +87,10 @@ public class OrderService implements IOrderService {
         order.setTotalPrice(orderDTO.getTotalPrice());
         order.setOrderDate(LocalDateTime.now());
         order.setShippingAddress(orderDTO.getShippingAddress());
-       // order.setCart(orderDTO.);
+        // order.setCart(orderDTO.);
 
         //Save Cart Information before clear Cart
-        if(orderDTO.getItems() != null){
+        if (orderDTO.getItems() != null) {
             saveOrderItems(order, orderDTO.getItems());
         }
 
@@ -101,11 +101,30 @@ public class OrderService implements IOrderService {
         if (orderRequest.getReceiverName().isEmpty()) {
             throw new AppException(ErrorCode.RECEIVER_NAME_EMPTY);
         }
-        if(!isValidVietnameseName(orderRequest.getReceiverName())){
+        if (!isValidVietnameseName(orderRequest.getReceiverName().toLowerCase())) {
             throw new AppException(ErrorCode.RECEIVER_NAME_INVALID);
         }
-        if(hasSpecialCharacters(orderRequest.getReceiverName())){
+        if (!hasSpecialCharacters(orderRequest.getReceiverName())) {
             throw new AppException(ErrorCode.RECEIVER_NAME_INVALID);
+        }
+        if (orderRequest.getShippingAddress().trim().equals(" ")) {
+            throw new AppException(ErrorCode.SHIPPING_ADDRESS_EMPTY);
+        }
+        if (!orderRequest.getShippingAddress().contains("Quận")) {
+            throw new AppException(ErrorCode.SHIPPING_ADDRESS_NOT_ENOUGH_FIELD);
+        }
+        String[] arrays = orderRequest.getShippingAddress().split("Quận");
+        boolean isValid = true;
+        for (int i = 0; i < arrays.length; i++) {
+            if (i == 0) {
+                if (arrays[i].trim().isEmpty() || arrays[i].trim().equals(" ")) {
+                    isValid = false;
+                    break;
+                }
+            }
+        }
+        if (!isValid) {
+            throw new AppException(ErrorCode.SHIPPING_ADDRESS_EMPTY);
         }
         if (orderRequest.getReceiverPhoneNumber().isEmpty()) {
             throw new AppException(ErrorCode.PHONE_NUMBER_EMPTY);
@@ -116,15 +135,10 @@ public class OrderService implements IOrderService {
         if (!orderRequest.getReceiverPhoneNumber().startsWith("0")) {
             throw new AppException(ErrorCode.INVALID_PHONE_NUMBER_START_WITH_ZERO);
         }
-        if(!checkNumberInPhoneNumbers(orderRequest.getReceiverPhoneNumber())){
+        if (!checkNumberInPhoneNumbers(orderRequest.getReceiverPhoneNumber())) {
             throw new AppException(ErrorCode.PHONE_NUMBER_MUST_CONTAIN_NUMBERS);
         }
-        if (orderRequest.getShippingAddress().isEmpty()) {
-            throw new AppException(ErrorCode.SHIPPING_ADDRESS_EMPTY);
-        }
-        if (!orderRequest.getShippingAddress().contains("Quận")) {
-            throw new AppException(ErrorCode.SHIPPING_ADDRESS_NOT_ENOUGH_FIELD);
-        }
+
     }
 
     private boolean hasSpecialCharacters(String input) {
@@ -135,13 +149,14 @@ public class OrderService implements IOrderService {
     }
 
     private boolean isValidVietnameseName(String input) {
-        String regex = "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽềềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ\\s]+$";
+        String regex = "^[a-zàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽềềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ\\s]+$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         return matcher.matches();
     }
 
-    private boolean checkNumberInPhoneNumbers(String input){
+
+    private boolean checkNumberInPhoneNumbers(String input) {
         String regex = "^[0-9]+$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
@@ -219,14 +234,14 @@ public class OrderService implements IOrderService {
 
     @Override
     public Order getOrderById(String id) {
-       Optional<Order> optionalOrder = orderRepository.findByIdWithCart(id);
-       if(optionalOrder.isEmpty()) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        Optional<Order> optionalOrder = orderRepository.findByIdWithCart(id);
+        if (optionalOrder.isEmpty()) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         System.out.println("Order fetched: " + optionalOrder.get().getId());
         System.out.println("Cart size: " + optionalOrder.get().getCart().size());
         for (OrderItem item : optionalOrder.get().getCart()) {
             System.out.println("Item: " + item.getProductName());
         }
-       return optionalOrder.get();
+        return optionalOrder.get();
     }
 
     public List<OrderItem> getOrderItemsByOrderId(String orderId) {
@@ -254,12 +269,12 @@ public class OrderService implements IOrderService {
         String[] token = reasons.split(";");
         List<String> reasonList = Arrays.asList(token);
 
-        if(reasonList.isEmpty()) {
+        if (reasonList.isEmpty()) {
             order.setFailureReasonNote(reason + "|" + LocalDateTime.now());
             order.setOrderStatus(Status.CANNOT_DELIVER);
         } else if (reasonList.size() == 1) {
             order.setFailureReasonNote(reasonList.get(0)
-            + ";" + reason + "|" + LocalDateTime.now());
+                    + ";" + reason + "|" + LocalDateTime.now());
             order.setOrderStatus(Status.CANNOT_DELIVER);
         } else {
             throw new RuntimeException("Can not cancel order more than 2 times");
@@ -287,7 +302,7 @@ public class OrderService implements IOrderService {
         if (order.getOrderStatus() == Status.CANNOT_DELIVER) {
             order.setOrderStatus(Status.IN_DELIVERY);
             return orderRepository.save(order);
-        } else{
+        } else {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
     }
@@ -335,8 +350,9 @@ public class OrderService implements IOrderService {
         order.setShippingAddress(orderDTO.getShippingAddress());
         return order;
     }
+
     @Override
-    public Long getNumberOfOrdersByStatus(String status) throws IllegalArgumentException{
+    public Long getNumberOfOrdersByStatus(String status) throws IllegalArgumentException {
         return orderRepository.getNumberOfOrdersByStatus(Status.valueOf(status));
     }
 
