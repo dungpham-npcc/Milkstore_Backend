@@ -30,6 +30,8 @@ public class RefundController {
         return new ResponseData<>(HttpStatus.OK.value(), "Create Refund Request Successful", refundService.createRefundRequest(userID, refundDTO, refundImageFile));
     }
 
+    @
+
 
     //Todo This function make to All user can get their refund request by user ID
     @GetMapping("/{userId}")
@@ -55,9 +57,16 @@ public class RefundController {
         return new ResponseData<>(HttpStatus.OK.value(), "Cancel Refund Request Successful", refundService.cancelRefundRequestForCustomer(refundId));
     }
 
+    //Todo this function make Staff can deny RefundRequest from customer phase 1
+    @PatchMapping("/{refundId}/deny1")
+    public ResponseData<Refund> denyRequestRefund1 (@PathVariable int refundId, @RequestParam String cancelReason1 ) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Deje Refund Request first time successful", refundService.canNotConfirmRefundRequest(refundId, cancelReason1));
+    }
+
+
     //Todo This function make to Staff can deny RefundRequest from customer phase 2
-    @PatchMapping("/{refundId}/deny")
-    public ResponseData<Refund> denyRequestRefund(@PathVariable int refundId, @RequestParam("denyImage") MultipartFile denyImage, @RequestParam String staffRejectReason) {
+    @PatchMapping("/{refundId}/deny2")
+    public ResponseData<Refund> denyRequestRefund2(@PathVariable int refundId, @RequestParam("denyImage") MultipartFile denyImage, @RequestParam String staffRejectReason) {
         return new ResponseData<>(HttpStatus.OK.value(), "Deny Refund Request Successful", refundService.denyRequestRefund(refundId, denyImage, staffRejectReason));
     }
 
