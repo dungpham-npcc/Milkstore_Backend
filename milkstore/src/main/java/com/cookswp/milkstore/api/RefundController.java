@@ -36,6 +36,11 @@ public class RefundController {
         return new ResponseData<>(HttpStatus.OK.value(), "Get Refund Request By User ID", refundService.getRefundRequestByUserId(userId));
     }
 
+    @GetMapping("/refund-detail/{refundID}")
+    public ResponseData<Refund> getRefundDetailByRefundID(@PathVariable int refundID){
+        return new ResponseData<>(HttpStatus.OK.value(), "Get refund detail", refundService.getRefundByID(refundID));
+    }
+
     //Todo This function make to Staff can get all refund request
     @GetMapping("/all")
     public ResponseData<List<Refund>> getAllRefundRequests() {
@@ -47,7 +52,6 @@ public class RefundController {
     public ResponseData<Refund> updateRefundImage(@PathVariable int refundId, @RequestParam("refundImage") MultipartFile refundImage) {
         return new ResponseData<>(HttpStatus.OK.value(), "Update Refund Image Successful", refundService.updateRefundImage(refundId, refundImage));
     }
-
     //Todo This function make to customer can cancel refund request in their side
     @PatchMapping("/{refundId}/cancel")
     public ResponseData<Refund> cancelRefundRequestForCustomer(@PathVariable int refundId) {
@@ -102,6 +106,8 @@ public class RefundController {
     public ResponseData<Refund> completeDeliveryBackRefundOrder(@PathVariable int refundId, @RequestParam("imgShip") MultipartFile imgShip) {
         return new ResponseData<>(HttpStatus.OK.value(), "Complete Delivery Back Refund Order Successful", refundService.completeDeliveryBackRefundOrder(refundId, imgShip));
     }
+
+
 }
 
 

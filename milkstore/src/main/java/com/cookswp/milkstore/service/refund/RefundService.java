@@ -254,6 +254,13 @@ public class RefundService implements IRefundService {
         }
     }
 
-
+    @Override
+    public Refund getRefundByID(int refundID) {
+        Optional<Refund> refundOptional = refundRepository.findById(refundID);
+        if (refundOptional.isEmpty()) {
+            throw new AppException(ErrorCode.REFUND_NOT_FOUND);
+        }
+        return refundOptional.get();
+    }
 }
 

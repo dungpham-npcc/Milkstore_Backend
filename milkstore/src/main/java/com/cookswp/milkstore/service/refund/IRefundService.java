@@ -36,4 +36,6 @@ public interface IRefundService {
 
     Refund completeDeliveryBackRefundOrder(int refundId, MultipartFile imgShip);
 
+    Refund getRefundByID(int refundID);
+
 }
