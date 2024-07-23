@@ -204,7 +204,7 @@ public class OrderService implements IOrderService {
                     orderItem.setOrderId(order.getId());
                     orderItem.setProductId(cartItem.getProduct().getProductID());
                     orderItem.setProductName(cartItem.getProduct().getProductName());
-                    orderItem.setProductImage(cartItem.getProduct().getProductImage());
+                    orderItem.setProductImage(cartItem.getProduct().getProductImage());//Set order_image
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPrice(cartItem.getProduct().getPrice());
                     orderItems.add(orderItem);
@@ -279,7 +279,6 @@ public class OrderService implements IOrderService {
         } else {
             throw new RuntimeException("Can not cancel order more than 2 times");
         }
-
         return orderRepository.save(order);
     }
 

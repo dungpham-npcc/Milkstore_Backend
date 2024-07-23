@@ -30,13 +30,13 @@ public class OrderItem {
     private int productId;
 
     @Column(name = "product_name", nullable = false)
-    private String productName;  // Thêm field productName
+    private String productName;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
     @Column(name = "product_image", nullable = false)
-    private String productImage;
+    private String productImage; // add new product Image
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
