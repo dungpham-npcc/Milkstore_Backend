@@ -11,7 +11,7 @@ public enum Status {
     DELIVERED(7,"Product has been delivered"),
     COMPLETE_EXCHANGE(8,"Completed all flow of buying"),
     CANNOT_CONFRIRM(9, "Can not confirm with some reason"),
-    IS_FEEDBACK(10, "User had been feedback");
+    IS_FEEDBACK(10, "User had been feedback");//FEED BACK ENUM
 
     private final int code;
     private final String message;
