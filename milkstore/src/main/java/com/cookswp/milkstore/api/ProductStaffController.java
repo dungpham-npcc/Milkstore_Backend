@@ -38,6 +38,11 @@ public class ProductStaffController {
         return new ResponseData<>(HttpStatus.OK.value(), "List of product category", productCategoryService.findAllProductCategories());
     }
 
+    @PatchMapping("/update-category/{categoryID}")
+    public ResponseData<ProductCategory> updateProductCategory(@PathVariable int categoryID, @RequestBody ProductCategoryDTO productCategoryRequest) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Update product category successfully", productCategoryService.updateProductCategory(categoryID, productCategoryRequest));
+    }
+
     @PostMapping
     public ResponseData<Product> createProduct(@ModelAttribute ProductDTO productRequest, @RequestParam("productImage") MultipartFile productImage) {
         AuthorizationUtils.checkAuthorization("POST_STAFF", "PRODUCT_STAFF", "SELLER");
