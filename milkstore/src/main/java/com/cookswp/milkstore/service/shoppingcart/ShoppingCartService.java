@@ -36,9 +36,13 @@ public class ShoppingCartService implements IShoppingCartService {
     @Override
     public List<ShowCartModelDTO> getCartByUserId(int userId) {
         ShoppingCart shoppingCart = shoppingCartRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+                .orElse(new ShoppingCart());
+        List<ShoppingCartItem> shoppingCartItems = shoppingCart.getItems();
+        if (shoppingCartItems == null) {
+            shoppingCartItems = new ArrayList<>();
+        }
 
-        List<ShowCartModelDTO.CartItemModel> items = shoppingCart.getItems().stream()
+        List<ShowCartModelDTO.CartItemModel> items = shoppingCartItems.stream()
                 .map(item -> {
                     ShowCartModelDTO.CartItemModel cartItemModel = new ShowCartModelDTO.CartItemModel();
                     cartItemModel.setProductId(item.getProduct().getProductID());
