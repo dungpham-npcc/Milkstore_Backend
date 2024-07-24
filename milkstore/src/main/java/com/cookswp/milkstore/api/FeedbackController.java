@@ -41,9 +41,11 @@ public class FeedbackController {
         return new ResponseData<>(HttpStatus.OK.value(), "List Feedback", feedBackService.getAllFeedback());
     }
 
-    @GetMapping("/{feedbackID}")
-    public ResponseData<Feedback> getFeedback(@PathVariable int feedbackID){
-        return new ResponseData<>(HttpStatus.OK.value(), "Get feedback", feedBackService.getFeedbackByID(feedbackID));
+    @GetMapping("/{orderID}")
+    public ResponseData<Feedback> getFeedback(@PathVariable String orderID){
+        return new ResponseData<>(HttpStatus.OK.value(), "Get feedback", feedBackService.getFeedbackByOrderID(orderID));
     }
+
+
     
 }
