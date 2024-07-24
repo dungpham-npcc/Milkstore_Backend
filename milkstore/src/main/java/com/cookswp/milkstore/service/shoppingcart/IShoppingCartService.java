@@ -10,7 +10,14 @@ import java.util.List;
 public interface IShoppingCartService {
     List<ShowCartModelDTO> getCartByUserId(int userId);
 
+    ShowCartModelDTO getTemporaryCartByUserId(int userId);
+    ShoppingCart createCart(int userId);
+
+    void deleteCart(int userId);
+
     ShoppingCart addToCart(AddToCartDTO addToCartDTO, int userId);
+
+    ShoppingCart addToTemporaryCart(AddToCartDTO addToCartDTO, int userId);
 
     ShoppingCart deleteItemFromCart(int cartId, int userId, int itemId);
 

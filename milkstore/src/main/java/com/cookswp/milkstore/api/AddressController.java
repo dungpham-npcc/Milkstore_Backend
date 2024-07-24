@@ -56,7 +56,7 @@ public class AddressController {
         if (address.getDistrict() == null ||
         address.getAddressLine() == null)
             throw new IllegalArgumentException("Địa chỉ và quận huyện không được để trống");
-
+        address.setUserId(userService.getCurrentUser().getUserId());
         UserAddress addressToAdd = mapper.map(address, UserAddress.class);
         addressService.createAddress(addressToAdd);
         return new ResponseData<>(HttpStatus.OK.value(), "Address added successfully!", address);

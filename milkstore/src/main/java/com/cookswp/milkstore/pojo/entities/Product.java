@@ -13,7 +13,8 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Builder
-@Setter@Getter
+@Setter
+@Getter
 @Table(name = "milk_product")
 public class Product implements Serializable {
 
@@ -25,7 +26,7 @@ public class Product implements Serializable {
 //    @Column(name = "orderID", nullable = true)
 //    private String orderID;
 
-    @Column(name ="category_id", nullable = false)
+    @Column(name = "category_id", nullable = false)
     private int categoryID;
 
     @Column(name = "product_name", nullable = false, unique = true)
@@ -57,8 +58,20 @@ public class Product implements Serializable {
     @Column(name = "visibility_status")
     private boolean visibilityStatus = true;
 
+    @Column(name = "publish_date", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate publishDate;
+
     //return true if manu date is before expi date
-    public boolean dateBefore(LocalDate manuDate, LocalDate expiDate){
-        return manuDate.isBefore(expiDate);
+    public boolean dateBefore(LocalDate manuDate, LocalDate expiDate) {
+        if (manuDate != null && expiDate != null) {
+            return manuDate.isBefore(expiDate);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" + "productID=" + productID + ", categoryID=" + categoryID + ", productName='" + productName + '\'' + ", productDescription='" + productDescription + '\'' + ", productImage='" + productImage + '\'' + ", quantity=" + quantity + ", price=" + price + ", manuDate=" + manuDate + ", expiDate=" + expiDate + ", deleteStatus=" + deleteStatus + ", visibilityStatus=" + visibilityStatus + ", publishDate=" + publishDate + '}';
     }
 }

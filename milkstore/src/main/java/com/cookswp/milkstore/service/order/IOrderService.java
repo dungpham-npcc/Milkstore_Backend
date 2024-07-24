@@ -17,13 +17,19 @@ public interface IOrderService {
 
     Order createOrder(int userID, CreateOrderRequest orderDTO);
 
+    Order createPreOrder(int userID, CreateOrderRequest orderDTO);
+
+//    Order createPreOrder(int userID, CreateOrderRequest orderDTO);
+
     Order updateOrder(String id, OrderDTO orderDTO);
+
+    Order updatePreOrderStatus(String orderID);
 
     void deleteOrder(String id);
 
     Order updateOrderStatus(String id);
 
-    List<Order> getAll();
+//    List<Order> getAll();
 
     Long getNumberOfOrdersByStatus(String status);
     Long getTotalOrders();

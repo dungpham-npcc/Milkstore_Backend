@@ -50,6 +50,7 @@ public class ProductService implements IProductService {
                 .price(productRequest.getPrice())
                 .manuDate(productRequest.getManuDate())
                 .expiDate(productRequest.getExpiDate())
+                .publishDate(productRequest.getPublishDate())
                 .deleteStatus(false)
                 .visibilityStatus(true)
                 .build();
@@ -63,8 +64,8 @@ public class ProductService implements IProductService {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-
-        validProductRequest(productRequest, checkDuplicateName);
+        if (productRequest.getManuDate() != null && productRequest.getExpiDate() != null)
+            validProductRequest(productRequest, checkDuplicateName);
         product.setCategoryID(productRequest.getCategoryID());
         product.setProductName(productRequest.getProductName());
         product.setProductDescription(productRequest.getProductDescription());
@@ -72,6 +73,7 @@ public class ProductService implements IProductService {
         product.setPrice(productRequest.getPrice());
         product.setManuDate(productRequest.getManuDate());
         product.setExpiDate(productRequest.getExpiDate());
+        product.setPublishDate(productRequest.getPublishDate());
         product.setDeleteStatus(false);
         product.setVisibilityStatus(true);
 
@@ -114,9 +116,10 @@ public class ProductService implements IProductService {
 
         return list.stream()
                 .peek(product -> {
-                    if (product.getExpiDate().isBefore(LocalDate.now()) && product.isVisibilityStatus()) {
-                        disableProduct(product.getProductID());
-                    }
+                    if (product.getExpiDate() != null)
+                        if (product.getExpiDate().isBefore(LocalDate.now()) && product.isVisibilityStatus()) {
+                            disableProduct(product.getProductID());
+                        }
                 })
                 .collect(Collectors.toList());
     }

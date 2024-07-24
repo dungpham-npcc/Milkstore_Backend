@@ -18,10 +18,12 @@ import com.cookswp.milkstore.service.firebase.FirebaseService;
 import com.cookswp.milkstore.service.product.ProductService;
 import com.cookswp.milkstore.service.shoppingcart.ShoppingCartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -47,9 +49,10 @@ public class OrderService implements IOrderService {
 
     private final FirebaseService firebaseService;
     private final ShoppingCartRepository shoppingCartRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository, FirebaseService firebaseService, ShoppingCartRepository shoppingCartRepository) {
+    public OrderService(ProductRepository productRepository, OrderRepository orderRepository, ProductService productService, ShoppingCartItemRepository shoppingCartItemRepository, TransactionLogRepository transactionLogRepository, UserRepository userRepository, OrderItemRepository orderItemRepository, FirebaseService firebaseService, ShoppingCartRepository shoppingCartRepository) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.shoppingCartItemRepository = shoppingCartItemRepository;
@@ -58,12 +61,19 @@ public class OrderService implements IOrderService {
         this.orderItemRepository = orderItemRepository;
         this.firebaseService = firebaseService;
         this.shoppingCartRepository = shoppingCartRepository;
+        this.productRepository = productRepository;
     }
 
 
     @Override
     public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+        List<Order> orders = orderRepository.findAll();
+        return orders.stream().peek(order -> {
+            if (Status.PRE_ORDERED.equals(order.getOrderStatus()) && productRepository.getProductById(orderItemRepository.findByOrderId(order.getId()).get(0).getProductId()).getPublishDate().isBefore(LocalDate.now())){
+                order.setOrderStatus(Status.PREORDERED_ORDER_IN_DELIVERY);
+                orderRepository.save(order);
+            }
+        }).toList();
     }
 
 
@@ -84,6 +94,35 @@ public class OrderService implements IOrderService {
         order.setReceiverName(orderDTO.getReceiverName());
         order.setReceiverPhone(orderDTO.getReceiverPhoneNumber());
         order.setOrderStatus(Status.IN_CART);
+        order.setTotalPrice(orderDTO.getTotalPrice());
+        order.setOrderDate(LocalDateTime.now());
+        order.setShippingAddress(orderDTO.getShippingAddress());
+        // order.setCart(orderDTO.);
+
+        //Save Cart Information before clear Cart
+        if (orderDTO.getItems() != null) {
+            saveOrderItems(order, orderDTO.getItems());
+        }
+
+        return orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public Order createPreOrder(int userID, CreateOrderRequest orderDTO) {
+        User user = userRepository.findByUserId(userID);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        validateCheckOut(orderDTO);
+        Order order = new Order();
+        UUID id = UUID.randomUUID();
+        order.setId(id.toString());
+        order.setUserId(userID);
+        //order.setCarID(orderDTO.getCartID());
+        order.setReceiverName(orderDTO.getReceiverName());
+        order.setReceiverPhone(orderDTO.getReceiverPhoneNumber());
+        order.setOrderStatus(Status.IN_PREORDER_PROGRESS);
         order.setTotalPrice(orderDTO.getTotalPrice());
         order.setOrderDate(LocalDateTime.now());
         order.setShippingAddress(orderDTO.getShippingAddress());
@@ -142,17 +181,19 @@ public class OrderService implements IOrderService {
     }
 
     private boolean hasSpecialCharacters(String input) {
-        String regex = "[!@#$%^&*()_+=-`~]";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(input);
-        return matcher.find();
+//        String regex = "[!@#$%^&*()_+=-`~]";
+//        Pattern pattern = Pattern.compile(regex);
+//        Matcher matcher = pattern.matcher(input);
+//        return matcher.find();
+        return true;
     }
 
     private boolean isValidVietnameseName(String input) {
-        String regex = "^[a-zàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽềềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ\\s]+$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(input);
-        return matcher.matches();
+//        String regex = "^[a-zàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽềềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ\\s]+$";
+//        Pattern pattern = Pattern.compile(regex);
+//        Matcher matcher = pattern.matcher(input);
+//        return matcher.matches();
+        return true;
     }
 
 
@@ -191,12 +232,10 @@ public class OrderService implements IOrderService {
         String statusCode = transactionLogRepository.findTransactionNoByTxnRef(orderID);
         if ("00".equals(statusCode)) {
             order.setOrderStatus(Status.PAID);
-            reduceProductQuantity(order.getId());
+            ShoppingCart shoppingCart = shoppingCartRepository.findCartsByUserId(order.getUserId()).get(0);
 
-            Optional<ShoppingCart> cartOptional = shoppingCartRepository.findByUserId(order.getUserId());
-            if (cartOptional.isPresent()) {
-                ShoppingCart shoppingCart = cartOptional.get();
-
+            if (shoppingCart != null) {
+                reduceProductQuantity(shoppingCart);
                 // Lưu các mục giỏ hàng vào bảng OrderItem
                 List<OrderItem> orderItems = new ArrayList<>();
                 for (ShoppingCartItem cartItem : shoppingCart.getItems()) {
@@ -220,14 +259,47 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public List<Order> getAll() {
-        return orderRepository.findAll();
+    public Order updatePreOrderStatus(String orderID) {
+        Optional<Order> findOrder = orderRepository.findById(orderID);
+        if (findOrder.isEmpty()) {
+            return null;
+        }
+        Order order = findOrder.get();
+        String statusCode = transactionLogRepository.findTransactionNoByTxnRef(orderID);
+        if ("00".equals(statusCode)) {
+            order.setOrderStatus(Status.PRE_ORDERED);
+            ShoppingCart cart = shoppingCartRepository.findCartsByUserId(order.getUserId()).get(1);
+
+            if (cart != null) {
+                reduceProductQuantity(cart);
+                // Lưu các mục giỏ hàng vào bảng OrderItem
+                List<OrderItem> orderItems = new ArrayList<>();
+                for (ShoppingCartItem cartItem : cart.getItems()) {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrderId(order.getId());
+                    orderItem.setProductId(cartItem.getProduct().getProductID());
+                    orderItem.setProductName(cartItem.getProduct().getProductName());
+                    orderItem.setProductImage(cartItem.getProduct().getProductImage());//Set order_image
+                    orderItem.setQuantity(cartItem.getQuantity());
+                    orderItem.setPrice(cartItem.getProduct().getPrice());
+                    orderItems.add(orderItem);
+                }
+                orderItemRepository.saveAll(orderItems);
+
+                shoppingCartRepository.deleteById(cart.getId());
+            }
+        }
+        return orderRepository.save(order);
     }
 
-    private void reduceProductQuantity(String orderId) {
-        List<ShoppingCartItem> cartItems = shoppingCartItemRepository.findById(String.valueOf(orderId));
+//    @Override
+//    public List<Order> getAll() {
+//        return orderRepository.findAll();
+//    }
 
-        for (ShoppingCartItem item : cartItems) {
+    private void reduceProductQuantity(ShoppingCart cart) {
+
+        for (ShoppingCartItem item : cart.getItems()) {
             productService.reduceQuantityProduct(item.getProduct().getProductID(), item.getQuantity());
         }
     }
@@ -287,7 +359,7 @@ public class OrderService implements IOrderService {
     public Order completeOrderTransaction(String OrderId, MultipartFile EvidenceImage) {
         Order order = getOrderById(OrderId);
         String imageURL = firebaseService.upload(EvidenceImage);
-        if (order.getOrderStatus() == Status.IN_DELIVERY && EvidenceImage != null) {
+        if ((order.getOrderStatus() == Status.IN_DELIVERY || Status.PREORDERED_ORDER_IN_DELIVERY.equals(order.getOrderStatus())) && EvidenceImage != null) {
             order.setOrderStatus(Status.COMPLETE_EXCHANGE);
             order.setImage(imageURL);
         } else {

@@ -1,9 +1,11 @@
 package com.cookswp.milkstore.service.vnpay;
 
 import com.cookswp.milkstore.configuration.VNPayConfig;
+import com.cookswp.milkstore.enums.Status;
 import com.cookswp.milkstore.pojo.dtos.PaymentModel.PaymentDTO;
 import com.cookswp.milkstore.pojo.dtos.PaymentModel.RequestCallBack;
 import com.cookswp.milkstore.pojo.dtos.PaymentModel.RequestPayment;
+import com.cookswp.milkstore.pojo.entities.Order;
 import com.cookswp.milkstore.pojo.entities.TransactionLog;
 import com.cookswp.milkstore.pojo.entities.User;
 import com.cookswp.milkstore.repository.transactionLog.TransactionLogRepository;
@@ -112,7 +114,11 @@ public class VNPayServiceImpl implements VNPayService {
         String responseCode = requestCallBack.getResponseCode();
         System.out.println(trans);
         String message = responseCode.equals("00") ? "Giao dịch thành công" : "Giao dịch thất bại";
-        orderService.updateOrderStatus(trans.getTxnRef());
+        Order order = orderService.getOrderById(trans.getTxnRef());
+        if (Status.IN_CART.equals(order.getOrderStatus()))
+            orderService.updateOrderStatus(trans.getTxnRef());
+        else if (Status.IN_PREORDER_PROGRESS.equals(order.getOrderStatus()))
+            orderService.updatePreOrderStatus(trans.getTxnRef());
         return PaymentDTO.builder()
                 .code(responseCode)
                 .message(message)

@@ -35,14 +35,9 @@ public class ShoppingCartService implements IShoppingCartService {
 
     @Override
     public List<ShowCartModelDTO> getCartByUserId(int userId) {
-        ShoppingCart shoppingCart = shoppingCartRepository.findByUserId(userId)
-                .orElse(new ShoppingCart());
-        List<ShoppingCartItem> shoppingCartItems = shoppingCart.getItems();
-        if (shoppingCartItems == null) {
-            shoppingCartItems = new ArrayList<>();
-        }
+        ShoppingCart shoppingCart = shoppingCartRepository.findCartsByUserId(userId).stream().findFirst().orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
 
-        List<ShowCartModelDTO.CartItemModel> items = shoppingCartItems.stream()
+        List<ShowCartModelDTO.CartItemModel> items = shoppingCart.getItems().stream()
                 .map(item -> {
                     ShowCartModelDTO.CartItemModel cartItemModel = new ShowCartModelDTO.CartItemModel();
                     cartItemModel.setProductId(item.getProduct().getProductID());
@@ -62,17 +57,87 @@ public class ShoppingCartService implements IShoppingCartService {
         return List.of(showCartModelDTO);
     }
 
+    @Override
+    public ShowCartModelDTO getTemporaryCartByUserId(int userId) {
+        ShoppingCart shoppingCart = shoppingCartRepository.findCartsByUserId(userId).get(1);
+
+        List<ShowCartModelDTO.CartItemModel> items = shoppingCart.getItems().stream()
+                .map(item -> {
+                    ShowCartModelDTO.CartItemModel cartItemModel = new ShowCartModelDTO.CartItemModel();
+                    cartItemModel.setProductId(item.getProduct().getProductID());
+                    cartItemModel.setProductName(item.getProduct().getProductName());
+                    cartItemModel.setQuantity(item.getQuantity());
+                    cartItemModel.setPrice(item.getProduct().getPrice());
+                    cartItemModel.setProductImage(item.getProduct().getProductImage());//Update image filed in cart
+                    return cartItemModel;
+                })
+                .collect(Collectors.toList());
+
+        ShowCartModelDTO showCartModelDTO = new ShowCartModelDTO();
+        showCartModelDTO.setCartId(shoppingCart.getId());
+        showCartModelDTO.setUserId(userId);
+        showCartModelDTO.setItems(items);
+
+        return showCartModelDTO;
+    }
+
 
     @Override
     @Transactional
     public ShoppingCart addToCart(AddToCartDTO addToCartDTO, int userId) {
-        ShoppingCart cart = shoppingCartRepository.findByUserId(userId)
+        ShoppingCart cart = shoppingCartRepository.findCartsByUserId(userId).stream().findFirst()
                 .orElseGet(() -> {
                     ShoppingCart newCart = new ShoppingCart();
                     newCart.setUserId(userId);
                     newCart.setItems(new ArrayList<>()); //Ensure not null
                     return shoppingCartRepository.save(newCart);
                 });
+
+        Product product = productRepository.findById(addToCartDTO.getProduct_id())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        int quantityInStock = product.getQuantity();
+        int requestedQuantity = addToCartDTO.getQuantity();
+
+        //Check quantity from customer and in stock
+        if (requestedQuantity <= 0) {
+            throw new AppException(ErrorCode.INVALID_QUANTITY);
+        }
+        if (quantityInStock <= 10){
+            throw new AppException(ErrorCode.PRODUCT_NOT_AVAILABLE);
+        }
+
+        Optional<ShoppingCartItem> existingItemOpt = cart.getItems().stream()
+                .filter(item -> item.getProduct().getProductID() == product.getProductID())
+                .findFirst();
+
+        if (existingItemOpt.isPresent()) {
+            ShoppingCartItem existingItem = existingItemOpt.get();
+            int newQuantity = existingItem.getQuantity() + requestedQuantity;
+            if (newQuantity > quantityInStock) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+            existingItem.setQuantity(newQuantity);
+            shoppingCartItemRepository.save(existingItem);
+        } else {
+            if (requestedQuantity > quantityInStock) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+            ShoppingCartItem newItem = new ShoppingCartItem();
+            newItem.setShoppingCart(cart);
+            newItem.setProduct(product);
+            newItem.setQuantity(requestedQuantity);
+            shoppingCartItemRepository.save(newItem);
+            cart.getItems().add(newItem);
+        }
+
+        return shoppingCartRepository.save(cart);
+    }
+
+    @Override
+    @Transactional
+    public ShoppingCart addToTemporaryCart(AddToCartDTO addToCartDTO, int userId) {
+        ShoppingCart cart = shoppingCartRepository.findCartsByUserId(userId).get(1);
 
         Product product = productRepository.findById(addToCartDTO.getProduct_id())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -197,4 +262,29 @@ public class ShoppingCartService implements IShoppingCartService {
     public ShoppingCart findCartByUserID(int cartId) {
         return shoppingCartRepository.findById(cartId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
     }
+
+    @Override
+    public ShoppingCart createCart(int userId){
+        List<ShoppingCart> carts = shoppingCartRepository.findCartsByUserId(userId);
+        ShoppingCart cart = new ShoppingCart();
+        if (carts.isEmpty()){
+            ShoppingCart firstCart = new ShoppingCart();
+            firstCart.setUserId(userId);
+            shoppingCartRepository.save(firstCart);
+        }
+        if (carts.size() > 1) {
+            shoppingCartRepository.deleteById(carts.get(1).getId());
+        }
+        cart.setUserId(userId);
+        cart.setItems(new ArrayList<>());
+        return shoppingCartRepository.save(cart);
+    }
+
+    @Override
+    public void deleteCart(int userId){
+        if (shoppingCartRepository.findCartsByUserId(userId).get(1) != null)
+            shoppingCartRepository.delete(shoppingCartRepository.findCartsByUserId(userId).get(1));
+    }
+
+
 }

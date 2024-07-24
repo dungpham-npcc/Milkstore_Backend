@@ -28,12 +28,10 @@ public class ProductDTO {
     @NotNull(message = "Product description can not be null")
     private String productDescription;
 
-    @NotNull(message = "Manufacturing date can not be null")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate manuDate;
 
-    @NotNull(message = "Expiration date can not be null")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expiDate;
@@ -47,5 +45,9 @@ public class ProductDTO {
     private BigDecimal price;
 
     private boolean visibilityStatus;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate publishDate;
 
 }

@@ -5,6 +5,7 @@ import com.cookswp.milkstore.pojo.dtos.OrderModel.OrderDTO;
 import com.cookswp.milkstore.pojo.entities.Order;
 import com.cookswp.milkstore.response.ResponseData;
 import com.cookswp.milkstore.service.order.OrderService;
+import com.cookswp.milkstore.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,11 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final UserService userService;
 
     @Autowired
-    public OrderController(OrderService orderService){
+    public OrderController(OrderService orderService, UserService userService){
+        this.userService = userService;
         this.orderService = orderService;
     }
 
@@ -39,6 +42,11 @@ public class OrderController {
     @PostMapping("/{userID}")
     public ResponseData<Order> createOrder(@PathVariable int userID, @RequestBody CreateOrderRequest orderDTO) {
         return new ResponseData<>(HttpStatus.CREATED.value(), "CREATE ORDER", orderService.createOrder(userID, orderDTO));
+    }
+
+    @PostMapping("/pre-order")
+    public ResponseData<Order> createPreOrder(@RequestBody CreateOrderRequest orderDTO) {
+        return new ResponseData<>(HttpStatus.CREATED.value(), "CREATE PREORDER", orderService.createPreOrder(userService.getCurrentUser().getUserId(), orderDTO));
     }
 
     //This API use to UpdateOrder information
@@ -89,8 +97,6 @@ public class OrderController {
     public ResponseData<Order> changeOrderStatus(@PathVariable String orderID) {
         return new ResponseData<>(HttpStatus.OK.value(), "Change status from CANNOT DELIVERY to DELIVERY successfully", orderService.cannotOrderInDelivery(orderID));
     }
-
-
 
 
 }
