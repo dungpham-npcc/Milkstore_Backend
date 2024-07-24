@@ -51,7 +51,7 @@ public class ProductStaffController {
 
     //Delete Product
     @PatchMapping("/{ID}/delete")
-    public ResponseData<Post> deleteProduct(@PathVariable int ID) {
+    public ResponseData<Product> deleteProduct(@PathVariable int ID) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         System.out.println(currentUser.getRole().getRoleName());
         AuthorizationUtils.checkAuthorization("POST_STAFF", "PRODUCT_STAFF", "SELLER");
