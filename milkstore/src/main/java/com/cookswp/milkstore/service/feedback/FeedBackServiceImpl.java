@@ -96,7 +96,11 @@ public class FeedBackServiceImpl implements IFeedBackService {
 
     @Override
     public Feedback getFeedbackByOrderID(String orderID) {
-        return feedbackRepository.findByOrderID(orderID);
+        Feedback feedback = feedbackRepository.findByOrderID(orderID);
+        if(feedback == null) {
+            throw new AppException(ErrorCode.FEEDBACK_NOT_FOUND);
+        }
+        return feedback;
     }
 
 }
