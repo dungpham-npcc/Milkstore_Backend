@@ -6,6 +6,7 @@ import com.cookswp.milkstore.exception.RoleNotFoundException;
 import com.cookswp.milkstore.exception.UnauthorizedAccessException;
 import com.cookswp.milkstore.pojo.dtos.UserModel.UserDTO;
 import com.cookswp.milkstore.pojo.dtos.UserModel.UserRegistrationDTO;
+import com.cookswp.milkstore.pojo.entities.ShoppingCart;
 import com.cookswp.milkstore.pojo.entities.User;
 import com.cookswp.milkstore.response.ResponseData;
 import com.cookswp.milkstore.service.user.UserService;
@@ -61,7 +62,6 @@ public class RegisterController {
         user.setUsername(userRegistrationDTO.getUsername());
         userService.updateUserBasicInformation(user.getUserId(), user);
         userService.updateUserPassword(user.getUserId(), userRegistrationDTO.getPassword());
-
         return new ResponseData<>(HttpStatus.CREATED.value(),
                 "Registration completed!",
                 mapper.map(user, UserDTO.class));
